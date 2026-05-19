@@ -430,6 +430,14 @@
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#e8c870"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M19.07 4.93A10 10 0 0 0 4.93 4.93"/></svg>
                 <span class="nav-label" style="color:#e8c870">Capital Inicial</span>
             </div>
+            <div class="nav-item" onclick="handleUndo()" id="btn-undo" style="opacity:0.4; pointer-events:none;">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#a0c4ff"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1 0 6 6.7L3 13"/></svg>
+                <span class="nav-label" style="color:#a0c4ff">Deshacer</span>
+            </div>
+            <div class="nav-item" onclick="openModal('modal-reset')" style="color:rgba(255,100,100,0.6);">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                <span class="nav-label">Borrar Todo</span>
+            </div>
         </div>
     </nav>
 
@@ -451,6 +459,14 @@
             <div class="mobile-nav-item" id="mnav-transactions" onclick="changeTab('transactions')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 Historial
+            </div>
+            <div class="mobile-nav-item" id="mnav-undo" onclick="handleUndo()" style="opacity:0.4; pointer-events:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#5b8fd4"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1 0 6 6.7L3 13"/></svg>
+                Deshacer
+            </div>
+            <div class="mobile-nav-item" onclick="openModal('modal-reset')" style="color:#c0392b;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                Reset
             </div>
         </div>
     </nav>
@@ -764,6 +780,21 @@
     </div>
 </div>
 
+<!-- Modal Confirmar Reset -->
+<div class="modal-overlay" id="modal-reset">
+    <div class="modal">
+        <p class="modal-title">🗑️ Borrar Todo</p>
+        <p style="font-size:13px; color:var(--text2); margin-bottom:8px;">Esta acción eliminará <strong>todos los datos</strong>: historial, inventario, caja y gráficas.</p>
+        <p style="font-size:13px; color:var(--red); font-weight:600; margin-bottom:20px;">⚠️ No se puede deshacer.</p>
+        <p style="font-size:12px; color:var(--text3); margin-bottom:6px;">Escribe <strong>BORRAR</strong> para confirmar:</p>
+        <div class="input-group">
+            <input type="text" class="input-field" id="reset-confirm" placeholder="Escribe BORRAR" autocomplete="off">
+        </div>
+        <button class="btn btn-danger" onclick="handleReset()">Restablecer App</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-reset'); document.getElementById('reset-confirm').value='';">Cancelar</button>
+    </div>
+</div>
+
 <!-- TOAST NOTIFICACIÓN -->
 <div class="toast" id="toast">
     <div class="toast-dot" id="toast-dot"></div>
@@ -837,6 +868,7 @@ function handleBuy() {
     const qty   = parseFloat(document.getElementById('buy-qty').value);
     const price = parseFloat(document.getElementById('buy-price').value);
     if (!qty || !price || qty <= 0 || price <= 0) { showToast('Ingresa valores válidos', 'error'); return; }
+    saveUndoSnapshot();
     addTransaction('Compra', `Compra ${qty}kg verde`, -price, { type:'green', qty });
     closeModal('modal-buy');
     document.getElementById('buy-qty').value = '';
@@ -849,6 +881,7 @@ function handleRoast() {
     const output = parseFloat(document.getElementById('roast-output').value);
     if (!input || !output || input <= 0 || output <= 0) { showToast('Ingresa valores válidos', 'error'); return; }
     if (state.inventory.green < input) { showToast('Stock verde insuficiente', 'error'); return; }
+    saveUndoSnapshot();
     // Quitamos verde primero, luego sumamos tostado mediante dos llamadas implícitas
     state.inventory.green   -= input;
     state.inventory.roasted += output;
@@ -874,6 +907,7 @@ function handleCashIn() {
     const amount = parseFloat(document.getElementById('cash-in-amount').value);
     const note   = document.getElementById('cash-in-note').value.trim() || 'Ingreso';
     if (!amount || amount <= 0) { showToast('Ingresa un monto válido', 'error'); return; }
+    saveUndoSnapshot();
     addTransaction('Ingreso', note, amount);
     closeModal('modal-cash-in');
     document.getElementById('cash-in-amount').value = '';
@@ -885,6 +919,7 @@ function handleExpense() {
     const amount = parseFloat(document.getElementById('expense-amount').value);
     const desc   = document.getElementById('expense-desc').value.trim() || 'Gasto';
     if (!amount || amount <= 0) { showToast('Ingresa un monto válido', 'error'); return; }
+    saveUndoSnapshot();
     addTransaction('Gasto', desc, -amount);
     closeModal('modal-expense');
     document.getElementById('expense-amount').value = '';
@@ -896,6 +931,7 @@ function handleSetup() {
     const cash    = parseFloat(document.getElementById('setup-cash').value)    || 0;
     const green   = parseFloat(document.getElementById('setup-green').value)   || 0;
     const roasted = parseFloat(document.getElementById('setup-roasted').value) || 0;
+    saveUndoSnapshot();
     state.cash = cash;
     state.inventory.green   = green;
     state.inventory.roasted = roasted;
@@ -1101,6 +1137,51 @@ function loadState()  {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) state = JSON.parse(saved);
     } catch(e) { console.warn('Error cargando estado', e); }
+}
+
+// ─── DESHACER ─────────────────────────────────────────────
+// Guardamos una copia del estado ANTES de cada cambio
+let undoStack = []; // máximo 1 nivel
+
+function saveUndoSnapshot() {
+    undoStack = [JSON.stringify(state)];
+    // Activar botones de deshacer
+    const btns = document.querySelectorAll('#btn-undo, #mnav-undo');
+    btns.forEach(b => { b.style.opacity = '1'; b.style.pointerEvents = 'auto'; });
+}
+
+function handleUndo() {
+    if (!undoStack.length) { showToast('Nada que deshacer', 'warning'); return; }
+    state = JSON.parse(undoStack.pop());
+    saveState();
+    updateUI();
+    // Desactivar botones
+    const btns = document.querySelectorAll('#btn-undo, #mnav-undo');
+    btns.forEach(b => { b.style.opacity = '0.4'; b.style.pointerEvents = 'none'; });
+    showToast('Última acción deshecha ↩️');
+}
+
+// Inyectamos saveUndoSnapshot al inicio de addTransaction
+const _origAddTransaction = addTransaction;
+// Monkey-patch: guardamos snapshot antes de cada transacción
+// (ya está implícito — llamamos saveUndoSnapshot() dentro de cada handler)
+
+// ─── RESET ────────────────────────────────────────────────
+function handleReset() {
+    const input = document.getElementById('reset-confirm').value.trim().toUpperCase();
+    if (input !== 'BORRAR') {
+        showToast('Escribe BORRAR para confirmar', 'error');
+        return;
+    }
+    state = { cash: 0, inventory: { green: 0, roasted: 0 }, history: [], snapshots: [] };
+    undoStack = [];
+    const btns = document.querySelectorAll('#btn-undo, #mnav-undo');
+    btns.forEach(b => { b.style.opacity = '0.4'; b.style.pointerEvents = 'none'; });
+    saveState();
+    updateUI();
+    closeModal('modal-reset');
+    document.getElementById('reset-confirm').value = '';
+    showToast('App restablecida a cero 🗑️', 'warning');
 }
 </script>
 </body>
