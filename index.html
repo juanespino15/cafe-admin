@@ -3,705 +3,507 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>CaféAdmin — Gestión Cafetalera</title>
+    <title>CaféAdmin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f5f0e8;
-            --bg2: #ffffff;
-            --bg3: #f0ebe0;
-            --border: #e2d9cc;
-            --border2: #d4c9b8;
-            --gold: #9c6f2e;
-            --gold2: #7a5520;
-            --gold-dim: rgba(156,111,46,0.1);
-            --text: #2c2015;
-            --text2: #6b5540;
-            --text3: #9c8878;
-            --green: #2e7d4f;
-            --red: #c0392b;
-            --blue: #2563a8;
+            --bg:      #F4F6F9;
+            --bg2:     #FFFFFF;
+            --bg3:     #EEF1F6;
+            --border:  #E2E8F0;
+            --border2: #CBD5E1;
+            --navy:    #1A2E4A;
+            --navy2:   #243B5C;
+            --accent:  #2563EB;
+            --accent2: #1D4ED8;
+            --green:   #059669;
+            --green2:  #047857;
+            --amber:   #D97706;
+            --red:     #DC2626;
+            --text:    #0F172A;
+            --text2:   #334155;
+            --text3:   #64748B;
+            --text4:   #94A3B8;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
-            font-family: 'DM Sans', sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
         }
 
-        h1, h2, .serif { font-family: 'DM Serif Display', serif; }
+        /* ── LAYOUT ── */
+        .main { padding: 24px 16px 100px; max-width: 520px; margin: 0 auto; }
 
-        /* Layout */
-        .app { display: flex; min-height: 100vh; }
-
-        /* SIDEBAR */
-        .sidebar {
-            width: 72px;
-            background: #2c1a0e;
-            border-right: 1px solid #1a0f08;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-            gap: 8px;
-            position: fixed;
-            top: 0; left: 0; bottom: 0;
-            z-index: 100;
-            transition: width 0.3s cubic-bezier(.4,0,.2,1);
-            overflow: hidden;
+        /* ── TOP BAR ── */
+        .topbar {
+            background: var(--navy);
+            padding: 16px 20px 14px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 50;
         }
-
-        .sidebar.open { width: 220px; }
-
-        .logo {
-            width: 40px; height: 40px;
-            background: var(--gold);
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            color: #0f0e0c;
-            font-size: 18px;
-            flex-shrink: 0;
-            transition: transform 0.2s;
+        .topbar-brand { display: flex; align-items: center; gap: 10px; }
+        .topbar-logo {
+            width: 34px; height: 34px; background: var(--accent);
+            border-radius: 9px; display: flex; align-items: center;
+            justify-content: center; font-size: 16px;
         }
-        .logo:hover { transform: scale(1.05); }
-        .logo-text {
-            font-family: 'DM Serif Display', serif;
-            font-size: 16px;
-            color: #e8c870;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.2s 0.1s;
-            flex: 1;
-        }
-        .sidebar.open .logo-text { opacity: 1; }
+        .topbar-name { font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+        .topbar-sub  { font-size: 10px; color: rgba(255,255,255,0.45); font-weight: 400; letter-spacing: 0; }
 
-        .logo-row {
-            display: flex; align-items: center;
-            gap: 12px; padding: 0 16px;
-            width: 100%;
-        }
-
-        .divider { width: 32px; height: 1px; background: var(--border); margin: 8px 0; transition: width 0.3s; }
-        .sidebar.open .divider { width: 188px; }
-
-        .nav-item {
-            width: 40px; height: 40px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: rgba(255,255,255,0.45);
-            flex-shrink: 0;
-            position: relative;
-        }
-        .sidebar.open .nav-item {
-            width: calc(100% - 24px);
-            padding: 0 12px;
-            justify-content: flex-start;
-            gap: 12px;
-        }
-        .nav-item:hover { background: rgba(255,255,255,0.1); color: #f0e0c0; }
-        .nav-item.active { background: rgba(201,161,74,0.2); color: #e8c870; }
-        .nav-item .nav-label {
-            font-size: 13px; font-weight: 500;
-            white-space: nowrap;
-            opacity: 0;
-            transition: opacity 0.2s 0.1s;
-        }
-        .sidebar.open .nav-item .nav-label { opacity: 1; }
-
-        .nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
-
-        .nav-section {
-            width: 100%;
-            display: flex; flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            padding: 0 16px;
-        }
-
-        .sidebar-bottom {
-            margin-top: auto;
-            width: 100%;
-            padding: 0 16px;
-            display: flex; flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        /* TOGGLE SIDEBAR BUTTON */
-        .toggle-btn {
-            width: 40px; height: 40px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            color: rgba(255,255,255,0.45);
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-        .toggle-btn:hover { background: rgba(255,255,255,0.1); color: #f0e0c0; }
-        .sidebar.open .toggle-btn { width: calc(100% - 32px); }
-
-        /* MAIN */
-        .main {
-            flex: 1;
-            margin-left: 72px;
-            padding: 32px 28px;
-            transition: margin-left 0.3s;
-            max-width: 100%;
-        }
-        .sidebar-open .main { margin-left: 220px; }
-
-        /* CARDS */
-        .card {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        }
-        .card-sm { padding: 16px; }
-
-        /* STAT CARDS */
-        .stat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px; }
-        @media(min-width: 768px){ .stat-grid { grid-template-columns: repeat(4, 1fr); } }
-
-        .stat-card {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 16px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-        }
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
-            background: var(--accent, var(--gold));
-        }
-        .stat-label {
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--text3);
-            margin-bottom: 6px;
-        }
-        .stat-value {
-            font-family: 'DM Serif Display', serif;
-            font-size: 22px;
-            color: var(--text);
-            line-height: 1;
-        }
-        .stat-sub { font-size: 10px; color: var(--text3); margin-top: 4px; }
-
-        /* ACTION CARDS */
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .action-card {
-            background: var(--bg2);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 14px;
-            cursor: pointer;
-            display: flex; flex-direction: column; gap: 8px;
-            transition: all 0.2s;
-            text-align: left;
-        }
-        .action-card:hover { border-color: var(--accent, var(--gold)); background: var(--bg3); transform: translateY(-1px); }
-        .action-icon {
-            width: 36px; height: 36px;
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px;
-        }
-        .action-title { font-size: 13px; font-weight: 600; color: var(--text); }
-        .action-sub { font-size: 11px; color: var(--text3); }
-
-        /* TABS */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* TABLE */
-        .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .data-table thead th {
-            text-align: left;
-            padding: 10px 12px;
-            font-size: 10px; font-weight: 600;
-            letter-spacing: 0.06em; text-transform: uppercase;
-            color: var(--text3);
-            border-bottom: 1px solid var(--border);
-        }
-        .data-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-        .data-table tbody tr:hover { background: var(--bg3); }
-        .data-table tbody td { padding: 12px; color: var(--text2); }
-        .data-table tbody td:first-child { color: var(--text3); font-size: 11px; }
-
-        /* BADGE */
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 99px;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-        }
-
-        /* PAGE HEADER */
-        .page-header { margin-bottom: 24px; }
-        .page-title { font-family: 'DM Serif Display', serif; font-size: 28px; line-height: 1; margin-bottom: 4px; }
-        .page-sub { font-size: 13px; color: var(--text3); }
-
-        /* MODALS */
-        .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-            display: none; align-items: center; justify-content: center;
-            padding: 20px; z-index: 999;
-        }
-        .modal-overlay.open { display: flex; }
-        .modal {
-            background: var(--bg2);
-            border: 1px solid var(--border2);
-            border-radius: 20px;
-            padding: 28px;
-            width: 100%; max-width: 400px;
-            animation: slideUp 0.25s cubic-bezier(.4,0,.2,1);
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-        }
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .modal-title { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 20px; }
-
-        /* INPUTS */
-        .input-group { margin-bottom: 14px; }
-        .input-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; display: block; }
-        .input-field {
-            width: 100%;
-            background: var(--bg3);
-            border: 1px solid var(--border2);
-            border-radius: 10px;
-            padding: 10px 14px;
-            color: var(--text);
-            font-family: 'DM Sans', sans-serif;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-        .input-field::placeholder { color: var(--text3); }
-        .input-field:focus { border-color: var(--gold); }
-
-        /* BUTTONS */
-        .btn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-            margin-bottom: 8px;
-        }
-        .btn-gold { background: var(--gold); color: #0f0e0c; }
-        .btn-gold:hover { background: var(--gold2); }
-        .btn-danger { background: rgba(224,90,90,0.15); color: var(--red); border: 1px solid rgba(224,90,90,0.25); }
-        .btn-danger:hover { background: rgba(224,90,90,0.25); }
-        .btn-ghost { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
-        .btn-ghost:hover { background: var(--border); }
-
-        /* SVG CHART */
-        #chart-svg { width: 100%; overflow: visible; }
-        .chart-line { fill: none; stroke: var(--gold); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-        .chart-area { opacity: 0.15; }
-
-        /* TOAST */
-        .toast {
-            position: fixed;
-            bottom: 24px; right: 24px;
-            background: #2c1a0e;
-            border: 1px solid #1a0f08;
-            border-radius: 12px;
-            padding: 12px 18px;
-            font-size: 13px;
-            color: #f0e0c0;
-            display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-            z-index: 9999;
-            transform: translateY(80px);
-            opacity: 0;
-            transition: all 0.3s cubic-bezier(.4,0,.2,1);
-        }
-        .toast.show { transform: translateY(0); opacity: 1; }
-        .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-
-        /* INVENTORY BARS */
-        .inv-bar-bg { background: var(--bg3); border-radius: 99px; height: 6px; overflow: hidden; margin-top: 10px; }
-        .inv-bar-fill { height: 100%; border-radius: 99px; background: var(--gold); transition: width 0.6s cubic-bezier(.4,0,.2,1); }
-
-        /* PERF STAT ROW */
-        .perf-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-        .perf-row:last-child { border-bottom: none; }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
-
-        /* Mobile bottom nav */
+        /* ── BOTTOM NAV ── */
         .mobile-nav {
-            display: none;
             position: fixed; bottom: 0; left: 0; right: 0;
-            background: #ffffff;
+            background: var(--bg2);
             border-top: 1px solid var(--border);
-            padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+            padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
             z-index: 200;
-            box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.07);
         }
         .mobile-nav-items { display: flex; justify-content: space-around; }
         .mobile-nav-item {
             display: flex; flex-direction: column; align-items: center;
-            gap: 3px; padding: 6px 12px;
-            cursor: pointer; color: var(--text3);
-            font-size: 10px; font-weight: 500;
-            border-radius: 10px; transition: all 0.2s;
+            gap: 3px; padding: 5px 10px;
+            cursor: pointer; color: var(--text4);
+            font-size: 9px; font-weight: 500;
+            border-radius: 8px; transition: all 0.15s;
+            min-width: 44px;
         }
-        .mobile-nav-item.active { color: var(--gold); }
         .mobile-nav-item svg { width: 20px; height: 20px; }
+        .mobile-nav-item.active { color: var(--accent); }
+        .mobile-nav-item.active svg { stroke: var(--accent); }
+        .mobile-nav-item.nav-config { color: var(--amber); }
+        .mobile-nav-item.nav-config svg { stroke: var(--amber); }
+        .mobile-nav-item.nav-undo { color: var(--text4); }
+        .mobile-nav-item.nav-reset { color: var(--red); }
+        .mobile-nav-item.nav-reset svg { stroke: var(--red); }
 
-        @media(max-width: 600px) {
-            .sidebar { display: none; }
-            .main { margin-left: 0; padding: 20px 16px 90px; }
-            .sidebar-open .main { margin-left: 0; }
-            .mobile-nav { display: block; }
-            .stat-grid { grid-template-columns: 1fr 1fr; }
-            .page-title { font-size: 22px; }
+        /* ── TABS ── */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* ── SECTION HEADER ── */
+        .section-header { margin-bottom: 20px; padding-top: 4px; }
+        .section-title  { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+        .section-sub    { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+        /* ── HERO CARD (patrimonio) ── */
+        .hero-card {
+            background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 100%);
+            border-radius: 18px;
+            padding: 22px 20px;
+            margin-bottom: 14px;
+            position: relative; overflow: hidden;
         }
+        .hero-card::before {
+            content: ''; position: absolute;
+            top: -40px; right: -40px;
+            width: 120px; height: 120px;
+            background: rgba(37,99,235,0.25);
+            border-radius: 50%;
+        }
+        .hero-label { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+        .hero-value { font-size: 36px; font-weight: 700; color: #fff; letter-spacing: -0.03em; line-height: 1; }
+        .hero-sub   { font-size: 12px; color: rgba(255,255,255,0.45); margin-top: 6px; }
+        .hero-pills { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+        .hero-pill  {
+            background: rgba(255,255,255,0.1); border-radius: 99px;
+            padding: 4px 11px; font-size: 11px; font-weight: 500;
+            color: rgba(255,255,255,0.75);
+        }
+
+        /* ── STAT GRID ── */
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card {
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 14px; padding: 14px 16px;
+            position: relative; overflow: hidden;
+        }
+        .stat-accent { position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 14px 14px 0 0; background: var(--sa, var(--accent)); }
+        .stat-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
+        .stat-value { font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+        .stat-sub   { font-size: 10px; color: var(--text4); margin-top: 3px; }
+
+        /* ── ACTIONS ── */
+        .actions-title { font-size: 12px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+        .action-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+        .action-card   {
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 14px; padding: 14px;
+            cursor: pointer; transition: all 0.15s;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .action-card:active { transform: scale(0.97); }
+        .action-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .action-title { font-size: 13px; font-weight: 600; color: var(--text); }
+        .action-sub   { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--bg2); border: 1px solid var(--border);
+            border-radius: 14px; padding: 16px;
+            margin-bottom: 14px;
+        }
+        .card-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 14px; }
+
+        /* ── TABLE ── */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .data-table thead th {
+            text-align: left; padding: 8px 10px;
+            font-size: 10px; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text4); border-bottom: 1px solid var(--border);
+        }
+        .data-table tbody tr { border-bottom: 1px solid var(--border); }
+        .data-table tbody tr:last-child { border-bottom: none; }
+        .data-table tbody td { padding: 10px; color: var(--text2); }
+        .data-table tbody td:first-child { color: var(--text4); font-size: 10px; }
+
+        /* ── BADGE ── */
+        .badge { display: inline-block; padding: 2px 7px; border-radius: 99px; font-size: 10px; font-weight: 600; letter-spacing: 0.03em; }
+
+        /* ── INV BARS ── */
+        .inv-bar-bg   { background: var(--bg3); border-radius: 99px; height: 5px; overflow: hidden; margin-top: 10px; }
+        .inv-bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+
+        /* ── PERF ── */
+        .perf-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--border); }
+        .perf-row:last-child { border-bottom: none; }
+
+        /* ── MODALS ── */
+        .modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(15,23,42,0.65);
+            backdrop-filter: blur(6px);
+            display: none; align-items: flex-end; justify-content: center;
+            padding: 0; z-index: 999;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: var(--bg2);
+            border-radius: 22px 22px 0 0;
+            padding: 28px 24px calc(28px + env(safe-area-inset-bottom));
+            width: 100%; max-width: 520px;
+            max-height: 90vh; overflow-y: auto;
+            animation: slideUp 0.25s cubic-bezier(.4,0,.2,1);
+        }
+        .modal-handle { width: 36px; height: 4px; background: var(--border2); border-radius: 99px; margin: 0 auto 20px; }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 6px; letter-spacing: -0.02em; }
+        .modal-sub   { font-size: 12px; color: var(--text3); margin-bottom: 20px; }
+
+        /* ── INPUTS ── */
+        .input-group  { margin-bottom: 14px; }
+        .input-label  { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; display: block; }
+        .input-field  {
+            width: 100%; background: var(--bg3); border: 1.5px solid var(--border);
+            border-radius: 10px; padding: 11px 14px; color: var(--text);
+            font-family: 'Inter', sans-serif; font-size: 15px; outline: none;
+            transition: border-color 0.15s;
+        }
+        .input-field::placeholder { color: var(--text4); }
+        .input-field:focus { border-color: var(--accent); background: var(--bg2); }
+
+        /* ── BUTTONS ── */
+        .btn { width: 100%; padding: 13px; border-radius: 11px; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; margin-bottom: 8px; }
+        .btn:active { transform: scale(0.98); }
+        .btn-primary { background: var(--accent); color: #fff; }
+        .btn-primary:active { background: var(--accent2); }
+        .btn-green  { background: var(--green); color: #fff; }
+        .btn-green:active { background: var(--green2); }
+        .btn-danger { background: rgba(220,38,38,0.1); color: var(--red); border: 1.5px solid rgba(220,38,38,0.2); }
+        .btn-ghost  { background: var(--bg3); color: var(--text2); border: 1.5px solid var(--border); }
+        .btn-amber  { background: var(--amber); color: #fff; }
+
+        /* ── SECTION DIVIDER ── */
+        .sec-div { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.07em; text-transform: uppercase; margin: 18px 0 10px; }
+
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: var(--navy); color: #fff;
+            border-radius: 12px; padding: 11px 18px;
+            font-size: 13px; font-weight: 500;
+            display: flex; align-items: center; gap: 8px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            z-index: 9999; opacity: 0; transition: all 0.25s cubic-bezier(.4,0,.2,1);
+            white-space: nowrap;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+
+        /* ── CHART ── */
+        #chart-svg { width: 100%; overflow: visible; }
+        .chart-line { fill: none; stroke: var(--accent); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+        /* ── SCROLLBAR ── */
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+        /* ── OVERFLOW TABLE ── */
+        .table-wrap { overflow-x: auto; }
     </style>
 </head>
 <body>
 
-<div class="app" id="app-root">
-
-    <!-- SIDEBAR (desktop) -->
-    <nav class="sidebar" id="sidebar">
-        <div class="logo-row">
-            <div class="logo" onclick="toggleSidebar()">☕</div>
-            <span class="logo-text">CaféAdmin</span>
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-brand">
+        <div class="topbar-logo">☕</div>
+        <div>
+            <div class="topbar-name">CaféAdmin</div>
+            <div class="topbar-sub">Gestión Cafetalera</div>
         </div>
-
-        <div class="divider"></div>
-
-        <div class="nav-section">
-            <div class="nav-item active" id="nav-dashboard" onclick="changeTab('dashboard')">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                <span class="nav-label">Panel</span>
-            </div>
-            <div class="nav-item" id="nav-inventory" onclick="changeTab('inventory')">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                <span class="nav-label">Inventario</span>
-            </div>
-            <div class="nav-item" id="nav-transactions" onclick="changeTab('transactions')">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                <span class="nav-label">Historial</span>
-            </div>
-            <div class="nav-item" id="nav-performance" onclick="changeTab('performance')">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-                <span class="nav-label">Rendimiento</span>
-            </div>
-        </div>
-
-        <div class="sidebar-bottom">
-            <div class="nav-item" onclick="openSetupModal()">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#e8c870"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M19.07 4.93A10 10 0 0 0 4.93 4.93"/></svg>
-                <span class="nav-label" style="color:#e8c870">Configurar</span>
-            </div>
-            <div class="nav-item" onclick="handleUndo()" id="btn-undo" style="opacity:0.4; pointer-events:none;">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#a0c4ff"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1 0 6 6.7L3 13"/></svg>
-                <span class="nav-label" style="color:#a0c4ff">Deshacer</span>
-            </div>
-            <div class="nav-item" onclick="openModal('modal-reset')" style="color:rgba(255,100,100,0.6);">
-                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                <span class="nav-label">Borrar Todo</span>
-            </div>
-        </div>
-    </nav>
-
-    <!-- MOBILE BOTTOM NAV -->
-    <nav class="mobile-nav">
-        <div class="mobile-nav-items">
-            <div class="mobile-nav-item active" id="mnav-dashboard" onclick="changeTab('dashboard')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-                Panel
-            </div>
-            <div class="mobile-nav-item" id="mnav-inventory" onclick="changeTab('inventory')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
-                Stock
-            </div>
-            <div class="mobile-nav-item" id="mnav-performance" onclick="changeTab('performance')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-                Gráfica
-            </div>
-            <div class="mobile-nav-item" id="mnav-transactions" onclick="changeTab('transactions')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                Historial
-            </div>
-            <div class="mobile-nav-item" id="mnav-undo" onclick="handleUndo()" style="opacity:0.4; pointer-events:none;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#5b8fd4"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1 0 6 6.7L3 13"/></svg>
-                Deshacer
-            </div>
-            <div class="mobile-nav-item" onclick="openModal('modal-reset')" style="color:#c0392b;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                Reset
-            </div>
-        </div>
-    </nav>
-
-    <!-- MAIN CONTENT -->
-    <main class="main">
-
-        <!-- ======================== DASHBOARD ======================== -->
-        <section id="tab-dashboard" class="tab-content active">
-            <div class="page-header">
-                <h2 class="page-title">Panel de Control</h2>
-                <p class="page-sub">Gestión de caja e inventario físico</p>
-                <div id="prices-badge" style="display:inline-flex; gap:12px; margin-top:8px; flex-wrap:wrap;">
-                    <span style="font-size:11px; background:rgba(155,139,110,0.15); color:#9b8b6e; border-radius:99px; padding:3px 10px; font-weight:600;">
-                        🌿 Verde: <span id="badge-price-green">$240</span>/saco
-                    </span>
-                    <span style="font-size:11px; background:rgba(200,121,65,0.15); color:#c87941; border-radius:99px; padding:3px 10px; font-weight:600;">
-                        🔥 Tostado: <span id="badge-price-roasted">$270</span>/saco
-                    </span>
-                </div>
-            </div>
-
-            <div class="stat-grid">
-                <div class="stat-card" style="--accent:#6b9ff0; grid-column: span 2;">
-                    <p class="stat-label">Patrimonio Total</p>
-                    <p class="stat-value" id="stat-total-patrimony">$0.00</p>
-                    <p class="stat-sub">Caja + Valor de Stock</p>
-                </div>
-                <div class="stat-card" style="--accent:#4caf6e;">
-                    <p class="stat-label">Efectivo</p>
-                    <p class="stat-value" id="stat-cash" style="font-size:18px">$0.00</p>
-                </div>
-                <div class="stat-card" style="--accent:var(--gold);">
-                    <p class="stat-label">Valor Stock</p>
-                    <p class="stat-value" id="stat-inv-val" style="font-size:18px">$0.00</p>
-                </div>
-                <div class="stat-card" style="--accent:#9b8b6e;">
-                    <p class="stat-label">Verde</p>
-                    <p class="stat-value" id="stat-green" style="font-size:18px">0 kg</p>
-                </div>
-                <div class="stat-card" style="--accent:#c87941;">
-                    <p class="stat-label">Tostado</p>
-                    <p class="stat-value" id="stat-roasted" style="font-size:18px">0 kg</p>
-                </div>
-            </div>
-
-            <!-- ACCIONES RÁPIDAS -->
-            <h3 class="serif" style="font-size:16px; margin-bottom:12px; color:var(--text2)">Acciones Rápidas</h3>
-            <div class="action-grid" style="margin-bottom:24px;">
-                <div class="action-card" style="--accent:#9b8b6e;" onclick="openModal('modal-buy')">
-                    <div class="action-icon" style="background:rgba(155,139,110,0.15); color:#9b8b6e;">📦</div>
-                    <div>
-                        <p class="action-title">Compra Verde</p>
-                        <p class="action-sub">Pago + entrada de grano</p>
-                    </div>
-                </div>
-                <div class="action-card" style="--accent:#c87941;" onclick="openModal('modal-roast')">
-                    <div class="action-icon" style="background:rgba(200,121,65,0.15); color:#c87941;">🔥</div>
-                    <div>
-                        <p class="action-title">Tostar Grano</p>
-                        <p class="action-sub">Convertir stock</p>
-                    </div>
-                </div>
-                <div class="action-card" style="--accent:var(--green);" onclick="openModal('modal-cash-in')">
-                    <div class="action-icon" style="background:rgba(76,175,110,0.15); color:var(--green);">💰</div>
-                    <div>
-                        <p class="action-title">Ingreso Caja</p>
-                        <p class="action-sub">Ventas u otros</p>
-                    </div>
-                </div>
-                <div class="action-card" style="--accent:var(--red);" onclick="openModal('modal-expense')">
-                    <div class="action-icon" style="background:rgba(224,90,90,0.15); color:var(--red);">💸</div>
-                    <div>
-                        <p class="action-title">Gasto</p>
-                        <p class="action-sub">Salida de efectivo</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ÚLTIMOS MOVIMIENTOS -->
-            <div class="card">
-                <h3 class="serif" style="font-size:16px; margin-bottom:16px;">Últimos Movimientos</h3>
-                <div style="overflow-x:auto;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Concepto</th>
-                                <th style="text-align:right">Efectivo</th>
-                                <th style="text-align:right">Stock</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recent-list">
-                            <tr><td colspan="4" style="text-align:center; padding:24px; color:var(--text3); font-style:italic;">Sin movimientos aún</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ======================== INVENTARIO ======================== -->
-        <section id="tab-inventory" class="tab-content">
-            <div class="page-header">
-                <h2 class="page-title">Control Físico</h2>
-                <p class="page-sub">Stock actual sin valoración financiera</p>
-            </div>
-
-            <div style="display:grid; gap:16px;">
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-                        <div>
-                            <p class="stat-label">Café Verde</p>
-                            <p class="stat-value" id="inv-green-qty">0 kg</p>
-                        </div>
-                        <div style="font-size:36px">🌱</div>
-                    </div>
-                    <p style="font-size:12px; color:var(--text3);" id="inv-green-saccos">— sacos equivalentes</p>
-                    <div class="inv-bar-bg"><div class="inv-bar-fill" id="inv-green-bar" style="width:0%; background:#9b8b6e;"></div></div>
-                </div>
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
-                        <div>
-                            <p class="stat-label">Café Tostado</p>
-                            <p class="stat-value" id="inv-roasted-qty">0 kg</p>
-                        </div>
-                        <div style="font-size:36px">☕</div>
-                    </div>
-                    <p style="font-size:12px; color:var(--text3);" id="inv-roasted-saccos">— sacos equivalentes</p>
-                    <div class="inv-bar-bg"><div class="inv-bar-fill" id="inv-roasted-bar" style="width:0%; background:#c87941;"></div></div>
-                </div>
-                <div class="card" style="background:var(--gold-dim); border-color:rgba(201,161,74,0.25);">
-                    <p class="stat-label" style="color:var(--gold);">Valor Total del Inventario</p>
-                    <p class="stat-value" id="inv-total-val">$0.00</p>
-                    <p class="stat-sub">Precio de mercado estimado</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ======================== HISTORIAL ======================== -->
-        <section id="tab-transactions" class="tab-content">
-            <div class="page-header">
-                <h2 class="page-title">Auditoría General</h2>
-                <p class="page-sub">Cronología completa de eventos</p>
-            </div>
-            <div class="card">
-                <div style="overflow-x:auto;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha/Hora</th>
-                                <th>Tipo</th>
-                                <th>Descripción</th>
-                                <th style="text-align:right">Efectivo</th>
-                                <th style="text-align:right">Stock</th>
-                            </tr>
-                        </thead>
-                        <tbody id="full-history-list">
-                            <tr><td colspan="5" style="text-align:center; padding:24px; color:var(--text3); font-style:italic;">Sin registros aún</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ======================== RENDIMIENTO ======================== -->
-        <section id="tab-performance" class="tab-content">
-            <div class="page-header">
-                <h2 class="page-title">Rendimiento</h2>
-                <p class="page-sub">Seguimiento del crecimiento patrimonial</p>
-            </div>
-
-            <!-- KPIs row -->
-            <div class="stat-grid" style="margin-bottom:20px;">
-                <div class="stat-card" style="--accent:var(--green);">
-                    <p class="stat-label">Capital Inicial</p>
-                    <p class="stat-value" id="perf-inicial" style="font-size:18px;">$0.00</p>
-                </div>
-                <div class="stat-card" style="--accent:var(--blue);">
-                    <p class="stat-label">Capital Actual</p>
-                    <p class="stat-value" id="perf-actual" style="font-size:18px;">$0.00</p>
-                </div>
-                <div class="stat-card" style="--accent:var(--gold); grid-column:span 2;">
-                    <p class="stat-label">Variación Total</p>
-                    <p class="stat-value" id="perf-variation" style="font-size:26px; color:var(--text3)">—</p>
-                </div>
-            </div>
-
-            <!-- Gráfico -->
-            <div class="card" style="margin-bottom:16px;">
-                <h3 class="serif" style="font-size:16px; margin-bottom:16px; color:var(--text2);">Tendencia de Patrimonio</h3>
-                <div id="chart-container" style="height:200px; position:relative;">
-                    <div id="chart-empty" style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text3); font-style:italic; font-size:13px;">Registra al menos 2 movimientos para ver la gráfica</div>
-                    <svg id="chart-svg" style="display:none; position:absolute; top:0; left:0;" viewBox="0 0 400 180" preserveAspectRatio="none">
-                        <defs>
-                            <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="0%" stop-color="#c9a14a" stop-opacity="0.4"/>
-                                <stop offset="100%" stop-color="#c9a14a" stop-opacity="0"/>
-                            </linearGradient>
-                        </defs>
-                        <path id="chart-area" class="chart-area" fill="url(#area-grad)"/>
-                        <path id="chart-line" class="chart-line"/>
-                        <g id="chart-dots"></g>
-                    </svg>
-                </div>
-            </div>
-
-            <!-- Tabla de snapshots -->
-            <div class="card">
-                <h3 class="serif" style="font-size:16px; margin-bottom:16px; color:var(--text2);">Historial de Valoración</h3>
-                <div style="overflow-x:auto;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th style="text-align:right">Efectivo</th>
-                                <th style="text-align:right">Stock</th>
-                                <th style="text-align:right">Patrimonio</th>
-                            </tr>
-                        </thead>
-                        <tbody id="perf-table">
-                            <tr><td colspan="4" style="text-align:center; padding:24px; color:var(--text3); font-style:italic;">Sin datos aún</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-    </main>
+    </div>
+    <div id="prices-badge" style="display:flex; gap:6px;">
+        <span style="font-size:10px; background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.6); border-radius:99px; padding:3px 8px; font-weight:500;">
+            🌿 <span id="badge-price-green">$240</span>
+        </span>
+        <span style="font-size:10px; background:rgba(255,255,255,0.1); color:rgba(255,255,255,0.6); border-radius:99px; padding:3px 8px; font-weight:500;">
+            🔥 <span id="badge-price-roasted">$270</span>
+        </span>
+    </div>
 </div>
 
-<!-- ======================== MODALES ======================== -->
+<!-- BOTTOM NAV -->
+<nav class="mobile-nav">
+    <div class="mobile-nav-items">
+        <div class="mobile-nav-item active" id="mnav-dashboard" onclick="changeTab('dashboard')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Panel
+        </div>
+        <div class="mobile-nav-item" id="mnav-inventory" onclick="changeTab('inventory')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            Stock
+        </div>
+        <div class="mobile-nav-item" id="mnav-performance" onclick="changeTab('performance')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            Gráfica
+        </div>
+        <div class="mobile-nav-item" id="mnav-transactions" onclick="changeTab('transactions')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Historial
+        </div>
+        <div class="mobile-nav-item nav-config" onclick="openSetupModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            Config
+        </div>
+        <div class="mobile-nav-item nav-undo" id="mnav-undo" onclick="handleUndo()" style="opacity:0.35; pointer-events:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1 0 6 6.7L3 13"/></svg>
+            Deshacer
+        </div>
+        <div class="mobile-nav-item nav-reset" onclick="openModal('modal-reset')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            Reset
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+    <!-- ═══ DASHBOARD ═══ -->
+    <section id="tab-dashboard" class="tab-content active">
+        <div class="section-header">
+            <div class="section-title">Panel de Control</div>
+            <div class="section-sub">Resumen financiero del día</div>
+        </div>
+
+        <!-- Hero -->
+        <div class="hero-card">
+            <div class="hero-label">Patrimonio Total</div>
+            <div class="hero-value" id="stat-total-patrimony">$0.00</div>
+            <div class="hero-sub">Caja + Valor de inventario</div>
+            <div class="hero-pills">
+                <div class="hero-pill">💵 Caja: <strong id="stat-cash">$0.00</strong></div>
+                <div class="hero-pill">📦 Stock: <strong id="stat-inv-val">$0.00</strong></div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-accent" style="--sa:#9B8B6E;"></div>
+                <div class="stat-label">Café Verde</div>
+                <div class="stat-value" id="stat-green">0 kg</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-accent" style="--sa:#C87941;"></div>
+                <div class="stat-label">Tostado</div>
+                <div class="stat-value" id="stat-roasted">0 kg</div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions-title">Acciones Rápidas</div>
+        <div class="action-grid">
+            <div class="action-card" onclick="openModal('modal-buy')">
+                <div class="action-icon" style="background:#F1F5F9; font-size:20px;">📦</div>
+                <div>
+                    <div class="action-title">Compra Verde</div>
+                    <div class="action-sub">Entrada de grano</div>
+                </div>
+            </div>
+            <div class="action-card" onclick="openModal('modal-roast')">
+                <div class="action-icon" style="background:#FFF7ED; font-size:20px;">🔥</div>
+                <div>
+                    <div class="action-title">Tostar Grano</div>
+                    <div class="action-sub">Convertir stock</div>
+                </div>
+            </div>
+            <div class="action-card" onclick="openModal('modal-cash-in')">
+                <div class="action-icon" style="background:#ECFDF5; font-size:20px;">💰</div>
+                <div>
+                    <div class="action-title">Ingreso Caja</div>
+                    <div class="action-sub">Ventas / otros</div>
+                </div>
+            </div>
+            <div class="action-card" onclick="openModal('modal-expense')">
+                <div class="action-icon" style="background:#FEF2F2; font-size:20px;">💸</div>
+                <div>
+                    <div class="action-title">Gasto</div>
+                    <div class="action-sub">Salida de efectivo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recientes -->
+        <div class="card">
+            <div class="card-title">Últimos Movimientos</div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Fecha</th><th>Concepto</th><th style="text-align:right">Efectivo</th></tr></thead>
+                    <tbody id="recent-list">
+                        <tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text4);font-size:12px;">Sin movimientos aún</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ INVENTARIO ═══ -->
+    <section id="tab-inventory" class="tab-content">
+        <div class="section-header">
+            <div class="section-title">Control Físico</div>
+            <div class="section-sub">Stock actual de inventario</div>
+        </div>
+
+        <div style="display:grid; gap:12px;">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div class="stat-label">Café Verde</div>
+                        <div class="stat-value" id="inv-green-qty" style="font-size:26px;">0 kg</div>
+                        <div class="stat-sub" id="inv-green-saccos">— sacos equivalentes</div>
+                    </div>
+                    <div style="font-size:32px; opacity:0.7;">🌱</div>
+                </div>
+                <div class="inv-bar-bg"><div class="inv-bar-fill" id="inv-green-bar" style="width:0%; background:#9B8B6E;"></div></div>
+            </div>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <div class="stat-label">Café Tostado</div>
+                        <div class="stat-value" id="inv-roasted-qty" style="font-size:26px;">0 kg</div>
+                        <div class="stat-sub" id="inv-roasted-saccos">— sacos equivalentes</div>
+                    </div>
+                    <div style="font-size:32px; opacity:0.7;">☕</div>
+                </div>
+                <div class="inv-bar-bg"><div class="inv-bar-fill" id="inv-roasted-bar" style="width:0%; background:#C87941;"></div></div>
+            </div>
+            <div class="card" style="background: linear-gradient(135deg,#EFF6FF,#DBEAFE); border-color:#BFDBFE;">
+                <div class="stat-label" style="color:var(--accent);">Valor Total del Inventario</div>
+                <div class="stat-value" id="inv-total-val" style="color:var(--accent);">$0.00</div>
+                <div class="stat-sub">Precio de mercado estimado</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ HISTORIAL ═══ -->
+    <section id="tab-transactions" class="tab-content">
+        <div class="section-header">
+            <div class="section-title">Auditoría</div>
+            <div class="section-sub">Cronología completa de eventos</div>
+        </div>
+        <div class="card" style="padding:0; overflow:hidden;">
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th>Descripción</th><th style="text-align:right">Efectivo</th></tr></thead>
+                    <tbody id="full-history-list">
+                        <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text4);font-size:12px;">Sin registros aún</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══ RENDIMIENTO ═══ -->
+    <section id="tab-performance" class="tab-content">
+        <div class="section-header">
+            <div class="section-title">Rendimiento</div>
+            <div class="section-sub">Crecimiento patrimonial</div>
+        </div>
+
+        <div class="stat-grid" style="margin-bottom:14px;">
+            <div class="stat-card">
+                <div class="stat-accent" style="--sa:var(--green);"></div>
+                <div class="stat-label">Capital Inicial</div>
+                <div class="stat-value" id="perf-inicial" style="font-size:17px;">$0.00</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-accent" style="--sa:var(--accent);"></div>
+                <div class="stat-label">Capital Actual</div>
+                <div class="stat-value" id="perf-actual" style="font-size:17px;">$0.00</div>
+            </div>
+        </div>
+        <div class="card" style="margin-bottom:14px;">
+            <div class="stat-label">Variación Total</div>
+            <div class="stat-value" id="perf-variation" style="font-size:28px; color:var(--text3);">—</div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px;">
+            <div class="card-title">Tendencia de Patrimonio</div>
+            <div id="chart-container" style="height:180px; position:relative;">
+                <div id="chart-empty" style="display:flex; align-items:center; justify-content:center; height:100%; color:var(--text4); font-size:12px;">Registra al menos 2 movimientos</div>
+                <svg id="chart-svg" style="display:none; position:absolute; top:0; left:0;" viewBox="0 0 400 160" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#2563EB" stop-opacity="0.2"/>
+                            <stop offset="100%" stop-color="#2563EB" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                    <path id="chart-area" fill="url(#area-grad)"/>
+                    <path id="chart-line" class="chart-line"/>
+                    <g id="chart-dots"></g>
+                </svg>
+            </div>
+        </div>
+
+        <div class="card" style="padding:0; overflow:hidden;">
+            <div style="padding:14px 16px 10px;"><div class="card-title" style="margin-bottom:0;">Historial de Valoración</div></div>
+            <div class="table-wrap">
+                <table class="data-table">
+                    <thead><tr><th>Fecha</th><th style="text-align:right">Efectivo</th><th style="text-align:right">Stock</th><th style="text-align:right">Patrimonio</th></tr></thead>
+                    <tbody id="perf-table">
+                        <tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text4);font-size:12px;">Sin datos aún</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</main>
+
+<!-- ═══ MODALES ═══ -->
 
 <!-- Compra Verde -->
 <div class="modal-overlay" id="modal-buy">
     <div class="modal">
-        <p class="modal-title">📦 Compra de Verde</p>
+        <div class="modal-handle"></div>
+        <div class="modal-title">📦 Compra de Verde</div>
+        <div class="modal-sub">Registra la entrada de grano verde y el pago realizado</div>
         <div class="input-group">
             <label class="input-label">Kilos de verde recibidos</label>
             <input type="number" step="0.01" min="0" class="input-field" id="buy-qty" placeholder="Ej: 46.2">
@@ -710,7 +512,7 @@
             <label class="input-label">Monto total pagado ($)</label>
             <input type="number" step="0.01" min="0" class="input-field" id="buy-price" placeholder="Ej: 240.00">
         </div>
-        <button class="btn btn-gold" onclick="handleBuy()">Registrar Compra</button>
+        <button class="btn btn-primary" onclick="handleBuy()">Registrar Compra</button>
         <button class="btn btn-ghost" onclick="closeModal('modal-buy')">Cancelar</button>
     </div>
 </div>
@@ -718,16 +520,18 @@
 <!-- Tostado -->
 <div class="modal-overlay" id="modal-roast">
     <div class="modal">
-        <p class="modal-title">🔥 Proceso de Tostado</p>
+        <div class="modal-handle"></div>
+        <div class="modal-title">🔥 Proceso de Tostado</div>
+        <div class="modal-sub">Convierte stock verde en café tostado</div>
         <div class="input-group">
-            <label class="input-label">Kg de Verde usados</label>
+            <label class="input-label">Kg de Verde utilizados</label>
             <input type="number" step="0.01" min="0" class="input-field" id="roast-input" placeholder="Ej: 46.2">
         </div>
         <div class="input-group">
             <label class="input-label">Kg de Tostado obtenidos</label>
             <input type="number" step="0.01" min="0" class="input-field" id="roast-output" placeholder="Ej: 36.0">
         </div>
-        <button class="btn" style="background:#c87941; color:#fff;" onclick="handleRoast()">Finalizar Tostado</button>
+        <button class="btn btn-amber" onclick="handleRoast()">Confirmar Tostado</button>
         <button class="btn btn-ghost" onclick="closeModal('modal-roast')">Cancelar</button>
     </div>
 </div>
@@ -735,7 +539,9 @@
 <!-- Ingreso Caja -->
 <div class="modal-overlay" id="modal-cash-in">
     <div class="modal">
-        <p class="modal-title">💰 Ingreso a Caja</p>
+        <div class="modal-handle"></div>
+        <div class="modal-title">💰 Ingreso a Caja</div>
+        <div class="modal-sub">Ventas u otras entradas de efectivo</div>
         <div class="input-group">
             <label class="input-label">Monto ($)</label>
             <input type="number" step="0.01" min="0" class="input-field" id="cash-in-amount" placeholder="Ej: 150.00">
@@ -744,7 +550,7 @@
             <label class="input-label">Nota / Concepto</label>
             <input type="text" class="input-field" id="cash-in-note" placeholder="Ej: Venta 5kg tostado">
         </div>
-        <button class="btn" style="background:var(--green); color:#fff;" onclick="handleCashIn()">Confirmar Ingreso</button>
+        <button class="btn btn-green" onclick="handleCashIn()">Confirmar Ingreso</button>
         <button class="btn btn-ghost" onclick="closeModal('modal-cash-in')">Cancelar</button>
     </div>
 </div>
@@ -752,7 +558,9 @@
 <!-- Gasto -->
 <div class="modal-overlay" id="modal-expense">
     <div class="modal">
-        <p class="modal-title">💸 Gasto / Egreso</p>
+        <div class="modal-handle"></div>
+        <div class="modal-title">💸 Gasto / Egreso</div>
+        <div class="modal-sub">Salida de efectivo de caja</div>
         <div class="input-group">
             <label class="input-label">Monto ($)</label>
             <input type="number" step="0.01" min="0" class="input-field" id="expense-amount" placeholder="Ej: 50.00">
@@ -761,69 +569,62 @@
             <label class="input-label">Descripción</label>
             <input type="text" class="input-field" id="expense-desc" placeholder="Ej: Bolsas de empaque">
         </div>
-        <button class="btn btn-danger" onclick="handleExpense()">Registrar Salida</button>
+        <button class="btn btn-danger" onclick="handleExpense()">Registrar Gasto</button>
         <button class="btn btn-ghost" onclick="closeModal('modal-expense')">Cancelar</button>
     </div>
 </div>
 
-<!-- Capital Inicial / Configuración -->
+<!-- Configuración -->
 <div class="modal-overlay" id="modal-setup">
-    <div class="modal" style="max-width:460px;">
-        <p class="modal-title">⚙️ Configuración Inicial</p>
-        <p style="font-size:12px; color:var(--text3); margin-bottom:20px;">Establece tu inventario, caja y precios actuales para empezar a usar la app.</p>
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">⚙️ Configuración</div>
+        <div class="modal-sub">Establece tu inventario, caja y precios actuales</div>
 
-        <!-- INVENTARIO -->
-        <p style="font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); margin-bottom:10px;">📦 Inventario Actual</p>
-
+        <div class="sec-div">📦 Inventario Actual</div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:4px;">
-            <div class="input-group" style="margin-bottom:0">
-                <label class="input-label">Sacos de Café Verde</label>
-                <input type="number" step="0.01" min="0" class="input-field" id="setup-green-sacks" placeholder="0">
-                <p style="font-size:10px; color:var(--text3); margin-top:4px;" id="setup-green-kg-preview">≈ 0.00 kg</p>
+            <div class="input-group" style="margin-bottom:0;">
+                <label class="input-label">Kg de Verde</label>
+                <input type="number" step="0.01" min="0" class="input-field" id="setup-green-kg" placeholder="0">
+                <p style="font-size:10px; color:var(--text4); margin-top:4px;" id="setup-green-sacks-preview">≈ 0.00 sacos</p>
             </div>
-            <div class="input-group" style="margin-bottom:0">
-                <label class="input-label">Kilos de Tostado</label>
+            <div class="input-group" style="margin-bottom:0;">
+                <label class="input-label">Kg de Tostado</label>
                 <input type="number" step="0.01" min="0" class="input-field" id="setup-roasted" placeholder="0">
+                <p style="font-size:10px; color:var(--text4); margin-top:4px;" id="setup-roasted-sacks-preview">≈ 0.00 sacos</p>
             </div>
         </div>
 
-        <!-- CAJA -->
-        <p style="font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); margin-top:18px; margin-bottom:10px;">💵 Caja</p>
+        <div class="sec-div">💵 Caja</div>
         <div class="input-group">
             <label class="input-label">Efectivo disponible ($)</label>
             <input type="number" step="0.01" class="input-field" id="setup-cash" placeholder="0.00">
         </div>
 
-        <!-- PRECIOS -->
-        <p style="font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); margin-top:6px; margin-bottom:10px;">💲 Precios por Saco</p>
+        <div class="sec-div">💲 Precios por Saco</div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-            <div class="input-group" style="margin-bottom:0">
+            <div class="input-group" style="margin-bottom:0;">
                 <label class="input-label">Saco Verde ($)</label>
                 <input type="number" step="0.01" min="0" class="input-field" id="setup-price-green" placeholder="240.00">
             </div>
-            <div class="input-group" style="margin-bottom:0">
+            <div class="input-group" style="margin-bottom:0;">
                 <label class="input-label">Saco Tostado ($)</label>
                 <input type="number" step="0.01" min="0" class="input-field" id="setup-price-roasted" placeholder="270.00">
             </div>
         </div>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px;">
-            <p style="font-size:10px; color:var(--text3);" id="setup-kg-green-label">Kg por saco: <span id="setup-kggreen-disp">46.2</span> kg</p>
-            <p style="font-size:10px; color:var(--text3);">Kg por saco: <span id="setup-kgroasted-disp">36</span> kg</p>
-        </div>
+        <p style="font-size:10px; color:var(--text4); margin-top:6px; margin-bottom:20px;">Verde: 46.2 kg/saco · Tostado: 36 kg/saco</p>
 
-        <div style="margin-top:20px;">
-            <button class="btn btn-gold" onclick="handleSetup()">✅ Aplicar y Guardar</button>
-            <button class="btn btn-ghost" onclick="closeModal('modal-setup')">Cancelar</button>
-        </div>
+        <button class="btn btn-primary" onclick="handleSetup()">✅ Aplicar y Guardar</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-setup')">Cancelar</button>
     </div>
 </div>
 
-<!-- Modal Confirmar Reset -->
+<!-- Reset -->
 <div class="modal-overlay" id="modal-reset">
     <div class="modal">
-        <p class="modal-title">🗑️ Borrar Todo</p>
-        <p style="font-size:13px; color:var(--text2); margin-bottom:8px;">Esta acción eliminará <strong>todos los datos</strong>: historial, inventario, caja y gráficas.</p>
-        <p style="font-size:13px; color:var(--red); font-weight:600; margin-bottom:20px;">⚠️ No se puede deshacer.</p>
+        <div class="modal-handle"></div>
+        <div class="modal-title">🗑️ Borrar Todo</div>
+        <div class="modal-sub">Esta acción eliminará todos los datos. No se puede deshacer.</div>
         <p style="font-size:12px; color:var(--text3); margin-bottom:6px;">Escribe <strong>BORRAR</strong> para confirmar:</p>
         <div class="input-group">
             <input type="text" class="input-field" id="reset-confirm" placeholder="Escribe BORRAR" autocomplete="off">
@@ -833,20 +634,20 @@
     </div>
 </div>
 
-<!-- TOAST NOTIFICACIÓN -->
+<!-- Toast -->
 <div class="toast" id="toast">
     <div class="toast-dot" id="toast-dot"></div>
     <span id="toast-msg">Operación registrada</span>
 </div>
 
 <script>
-// ─── CONSTANTES BASE (defaults) ───────────────────────────
+// ─── CONSTANTES ───────────────────────────────────────────
 const DEFAULT_PRICE_GREEN_SACK   = 240;
 const DEFAULT_PRICE_ROASTED_SACK = 270;
 const KG_PER_SACK_GREEN          = 46.2;
 const KG_PER_SACK_ROASTED        = 36;
 const MAX_SNAPSHOTS = 30;
-const STORAGE_KEY = 'cafe_admin_v5';
+const STORAGE_KEY   = 'cafe_admin_v5';
 
 // ─── ESTADO ───────────────────────────────────────────────
 let state = {
@@ -854,56 +655,36 @@ let state = {
     inventory: { green: 0, roasted: 0 },
     history: [],
     snapshots: [],
-    prices: {
-        greenSack:   DEFAULT_PRICE_GREEN_SACK,
-        roastedSack: DEFAULT_PRICE_ROASTED_SACK
-    }
+    prices: { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK }
 };
 
 // ─── INIT ─────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
     loadState();
     updateUI();
+    document.getElementById('setup-green-kg').addEventListener('input', updateInventoryPreviews);
+    document.getElementById('setup-roasted').addEventListener('input', updateInventoryPreviews);
 });
 
-// ─── CÁLCULO PATRIMONIO ───────────────────────────────────
+// ─── PATRIMONIO ───────────────────────────────────────────
 function calcPatrimony() {
-    const prices = state.prices || { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
+    const p = state.prices || { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
     const invVal =
-        (state.inventory.green   / KG_PER_SACK_GREEN)   * prices.greenSack +
-        (state.inventory.roasted / KG_PER_SACK_ROASTED) * prices.roastedSack;
+        (state.inventory.green   / KG_PER_SACK_GREEN)   * p.greenSack +
+        (state.inventory.roasted / KG_PER_SACK_ROASTED) * p.roastedSack;
     return { total: state.cash + invVal, invVal };
 }
 
-// ─── REGISTRO DE TRANSACCIÓN ──────────────────────────────
+// ─── TRANSACCIÓN ──────────────────────────────────────────
 function addTransaction(type, desc, cashDelta, stockDelta = null) {
-    // Aplicar cambios
     state.cash += cashDelta;
-    if (stockDelta) {
-        state.inventory[stockDelta.type] += stockDelta.qty;
-    }
-
-    // Guardar en historial
+    if (stockDelta) state.inventory[stockDelta.type] += stockDelta.qty;
     const now = new Date();
-    state.history.unshift({
-        id: Date.now(),
-        timestamp: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }),
-        type, desc, cashDelta, stockDelta
-    });
-
-    // Snapshot de patrimonio
+    state.history.unshift({ id: Date.now(), timestamp: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), type, desc, cashDelta, stockDelta });
     const pat = calcPatrimony();
-    state.snapshots.push({
-        date: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }),
-        ts: now.getTime(),
-        patrimony: pat.total,
-        cash: state.cash,
-        invVal: pat.invVal
-    });
+    state.snapshots.push({ date: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), ts: now.getTime(), patrimony: pat.total, cash: state.cash, invVal: pat.invVal });
     if (state.snapshots.length > MAX_SNAPSHOTS) state.snapshots.shift();
-
-    saveState();
-    updateUI();
+    saveState(); updateUI();
 }
 
 // ─── HANDLERS ─────────────────────────────────────────────
@@ -925,17 +706,10 @@ function handleRoast() {
     if (!input || !output || input <= 0 || output <= 0) { showToast('Ingresa valores válidos', 'error'); return; }
     if (state.inventory.green < input) { showToast('Stock verde insuficiente', 'error'); return; }
     saveUndoSnapshot();
-    // Quitamos verde primero, luego sumamos tostado mediante dos llamadas implícitas
     state.inventory.green   -= input;
     state.inventory.roasted += output;
-    // Registramos la transacción manualmente (sin doble cambio de cash)
     const now = new Date();
-    state.history.unshift({
-        id: Date.now(), type:'Tostado',
-        timestamp: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }),
-        desc: `Tostado: -${input}kg V → +${output}kg T`,
-        cashDelta: 0, stockDelta: null
-    });
+    state.history.unshift({ id: Date.now(), type:'Tostado', timestamp: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), desc: `Tostado: -${input}kg V → +${output}kg T`, cashDelta: 0, stockDelta: null });
     const pat = calcPatrimony();
     state.snapshots.push({ date: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), ts: now.getTime(), patrimony: pat.total, cash: state.cash, invVal: pat.invVal });
     if (state.snapshots.length > MAX_SNAPSHOTS) state.snapshots.shift();
@@ -971,68 +745,66 @@ function handleExpense() {
 }
 
 function handleSetup() {
-    const sacks   = parseFloat(document.getElementById('setup-green-sacks').value) || 0;
-    const roasted = parseFloat(document.getElementById('setup-roasted').value)      || 0;
-    const cash    = parseFloat(document.getElementById('setup-cash').value)         || 0;
-
-    const priceGreen   = parseFloat(document.getElementById('setup-price-green').value)   || DEFAULT_PRICE_GREEN_SACK;
-    const priceRoasted = parseFloat(document.getElementById('setup-price-roasted').value) || DEFAULT_PRICE_ROASTED_SACK;
+    const greenKg      = parseFloat(document.getElementById('setup-green-kg').value)      || 0;
+    const roasted      = parseFloat(document.getElementById('setup-roasted').value)        || 0;
+    const cash         = parseFloat(document.getElementById('setup-cash').value)           || 0;
+    const priceGreen   = parseFloat(document.getElementById('setup-price-green').value)    || DEFAULT_PRICE_GREEN_SACK;
+    const priceRoasted = parseFloat(document.getElementById('setup-price-roasted').value)  || DEFAULT_PRICE_ROASTED_SACK;
 
     saveUndoSnapshot();
     state.cash = cash;
-    state.inventory.green   = sacks * KG_PER_SACK_GREEN;
+    state.inventory.green   = greenKg;
     state.inventory.roasted = roasted;
     state.prices = { greenSack: priceGreen, roastedSack: priceRoasted };
 
     const now = new Date();
-    state.history.unshift({
-        id: Date.now(), type:'Ajuste',
-        timestamp: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }),
-        desc: `Configuración inicial: ${sacks} sacos verde, ${roasted}kg tostado, $${cash} caja`,
-        cashDelta: 0, stockDelta: null
-    });
+    const sacosV = (greenKg / KG_PER_SACK_GREEN).toFixed(2);
+    const sacosT = (roasted / KG_PER_SACK_ROASTED).toFixed(2);
+    state.history.unshift({ id: Date.now(), type:'Ajuste', timestamp: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), desc: `Config: ${greenKg}kg verde (${sacosV} sacos), ${roasted}kg tostado (${sacosT} sacos), $${cash} caja`, cashDelta: 0, stockDelta: null });
     const pat = calcPatrimony();
     state.snapshots.push({ date: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), ts: now.getTime(), patrimony: pat.total, cash: state.cash, invVal: pat.invVal });
     if (state.snapshots.length > MAX_SNAPSHOTS) state.snapshots.shift();
     saveState(); updateUI();
     closeModal('modal-setup');
-    showToast('✅ Configuración guardada correctamente');
+    showToast('✅ Configuración guardada');
 }
 
 function openSetupModal() {
-    // Pre-llenar con valores actuales
     const prices = state.prices || { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
-    document.getElementById('setup-green-sacks').value  = state.inventory.green   ? (state.inventory.green / KG_PER_SACK_GREEN).toFixed(2) : '';
-    document.getElementById('setup-roasted').value      = state.inventory.roasted || '';
-    document.getElementById('setup-cash').value         = state.cash              || '';
-    document.getElementById('setup-price-green').value   = prices.greenSack;
-    document.getElementById('setup-price-roasted').value = prices.roastedSack;
-    updateGreenKgPreview();
-    openSetupModal();
+    document.getElementById('setup-green-kg').value         = state.inventory.green   || '';
+    document.getElementById('setup-roasted').value          = state.inventory.roasted || '';
+    document.getElementById('setup-cash').value             = state.cash              || '';
+    document.getElementById('setup-price-green').value      = prices.greenSack;
+    document.getElementById('setup-price-roasted').value    = prices.roastedSack;
+    updateInventoryPreviews();
+    openModal('modal-setup');
+}
+
+function updateInventoryPreviews() {
+    const greenKg  = parseFloat(document.getElementById('setup-green-kg').value)  || 0;
+    const roastedKg = parseFloat(document.getElementById('setup-roasted').value)  || 0;
+    document.getElementById('setup-green-sacks-preview').textContent   = `≈ ${(greenKg  / KG_PER_SACK_GREEN).toFixed(2)} sacos`;
+    document.getElementById('setup-roasted-sacks-preview').textContent = `≈ ${(roastedKg / KG_PER_SACK_ROASTED).toFixed(2)} sacos`;
 }
 
 // ─── UI UPDATE ────────────────────────────────────────────
 function updateUI() {
-    const pat = calcPatrimony();
+    const pat    = calcPatrimony();
     const prices = state.prices || { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
 
-    // Dashboard stats
     setText('stat-total-patrimony', fmt(pat.total));
-    setText('stat-cash', fmt(state.cash));
+    setText('stat-cash',    fmt(state.cash));
     setText('stat-inv-val', fmt(pat.invVal));
-    setText('stat-green', state.inventory.green.toFixed(1) + ' kg');
+    setText('stat-green',   state.inventory.green.toFixed(1)   + ' kg');
     setText('stat-roasted', state.inventory.roasted.toFixed(1) + ' kg');
-
-    // Price badges
     setText('badge-price-green',   '$' + prices.greenSack);
     setText('badge-price-roasted', '$' + prices.roastedSack);
 
-    // Inventario
     const maxKg = Math.max(state.inventory.green, state.inventory.roasted, 100);
-    setText('inv-green-qty',   state.inventory.green.toFixed(1)   + ' kg');
-    setText('inv-roasted-qty', state.inventory.roasted.toFixed(1) + ' kg');
-    setText('inv-green-saccos',   `≈ ${(state.inventory.green / KG_PER_SACK_GREEN).toFixed(2)} sacos`);
-    setText('inv-roasted-saccos', `≈ ${(state.inventory.roasted / KG_PER_SACK_ROASTED).toFixed(2)} sacos`);
+    setText('inv-green-qty',     state.inventory.green.toFixed(1)   + ' kg');
+    setText('inv-roasted-qty',   state.inventory.roasted.toFixed(1) + ' kg');
+    setText('inv-green-saccos',  `≈ ${(state.inventory.green   / KG_PER_SACK_GREEN).toFixed(2)} sacos`);
+    setText('inv-roasted-saccos',`≈ ${(state.inventory.roasted / KG_PER_SACK_ROASTED).toFixed(2)} sacos`);
     setStyle('inv-green-bar',   'width', (state.inventory.green   / maxKg * 100).toFixed(1) + '%');
     setStyle('inv-roasted-bar', 'width', (state.inventory.roasted / maxKg * 100).toFixed(1) + '%');
     setText('inv-total-val', fmt(pat.invVal));
@@ -1042,47 +814,44 @@ function updateUI() {
 }
 
 function renderLists() {
-    // Recent (dashboard)
     const recentBody = document.getElementById('recent-list');
     const fullBody   = document.getElementById('full-history-list');
-    if (!state.history.length) {
-        recentBody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text3);font-style:italic;">Sin movimientos aún</td></tr>';
-        fullBody.innerHTML   = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text3);font-style:italic;">Sin registros aún</td></tr>';
-        return;
-    }
+    const empty3 = '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--text4);font-size:12px;">Sin movimientos aún</td></tr>';
+    const empty4 = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text4);font-size:12px;">Sin registros aún</td></tr>';
+    if (!state.history.length) { recentBody.innerHTML = empty3; fullBody.innerHTML = empty4; return; }
 
     recentBody.innerHTML = state.history.slice(0, 8).map(item => {
-        const cashColor = item.cashDelta > 0 ? 'color:var(--green)' : (item.cashDelta < 0 ? 'color:var(--red)' : 'color:var(--text3)');
-        const cashStr = item.cashDelta === 0 ? '—' : (item.cashDelta > 0 ? '+' : '') + fmt(item.cashDelta);
-        const stockStr = item.stockDelta ? `${item.stockDelta.qty > 0 ? '+' : ''}${item.stockDelta.qty}kg` : '—';
+        const cashColor = item.cashDelta > 0 ? 'color:var(--green)' : (item.cashDelta < 0 ? 'color:var(--red)' : 'color:var(--text4)');
+        const cashStr   = item.cashDelta === 0 ? '—' : (item.cashDelta > 0 ? '+' : '') + fmt(item.cashDelta);
         return `<tr>
             <td>${item.timestamp}</td>
-            <td style="color:var(--text); font-weight:500">${item.desc}</td>
-            <td style="text-align:right; font-weight:600; ${cashColor}">${cashStr}</td>
-            <td style="text-align:right; color:var(--text3)">${stockStr}</td>
+            <td style="color:var(--text2);font-weight:500;">${item.desc}</td>
+            <td style="text-align:right;font-weight:600;${cashColor}">${cashStr}</td>
         </tr>`;
     }).join('');
 
+    const typeColors = {
+        Compra:  'background:#F1F5F9;color:#9B8B6E',
+        Tostado: 'background:#FFF7ED;color:#C87941',
+        Ingreso: 'background:#ECFDF5;color:var(--green)',
+        Gasto:   'background:#FEF2F2;color:var(--red)',
+        Ajuste:  'background:#EFF6FF;color:var(--accent)'
+    };
     fullBody.innerHTML = state.history.map(item => {
-        const cashColor = item.cashDelta > 0 ? 'color:var(--green)' : (item.cashDelta < 0 ? 'color:var(--red)' : 'color:var(--text3)');
-        const cashStr = item.cashDelta === 0 ? '—' : (item.cashDelta > 0 ? '+' : '') + fmt(item.cashDelta);
-        const typeColors = { Compra:'background:rgba(155,139,110,0.2);color:#9b8b6e', Tostado:'background:rgba(200,121,65,0.2);color:#c87941', Ingreso:'background:rgba(76,175,110,0.2);color:var(--green)', Gasto:'background:rgba(224,90,90,0.2);color:var(--red)', Ajuste:'background:rgba(107,159,240,0.2);color:var(--blue)' };
-        const badge = `<span class="badge" style="${typeColors[item.type]||''}">${item.type}</span>`;
-        const stockStr = item.stockDelta ? `${item.stockDelta.qty > 0 ? '+' : ''}${item.stockDelta.qty}kg` : '—';
+        const cashColor = item.cashDelta > 0 ? 'color:var(--green)' : (item.cashDelta < 0 ? 'color:var(--red)' : 'color:var(--text4)');
+        const cashStr   = item.cashDelta === 0 ? '—' : (item.cashDelta > 0 ? '+' : '') + fmt(item.cashDelta);
+        const badge     = `<span class="badge" style="${typeColors[item.type]||''}">${item.type}</span>`;
         return `<tr>
             <td>${item.timestamp}</td>
             <td>${badge}</td>
-            <td style="color:var(--text)">${item.desc}</td>
-            <td style="text-align:right; font-weight:600; ${cashColor}">${cashStr}</td>
-            <td style="text-align:right; color:var(--text3)">${stockStr}</td>
+            <td style="color:var(--text2);">${item.desc}</td>
+            <td style="text-align:right;font-weight:600;${cashColor}">${cashStr}</td>
         </tr>`;
     }).join('');
 }
 
 function renderPerformance() {
     const snaps = state.snapshots;
-
-    // KPIs
     if (snaps.length > 0) {
         const first = snaps[0].patrimony;
         const last  = snaps[snaps.length - 1].patrimony;
@@ -1095,17 +864,14 @@ function renderPerformance() {
             el.style.color = diff >= 0 ? 'var(--green)' : 'var(--red)';
         }
     }
-
-    // Gráfico
     const chartSvg   = document.getElementById('chart-svg');
     const chartEmpty = document.getElementById('chart-empty');
     if (snaps.length >= 2) {
         chartEmpty.style.display = 'none';
         chartSvg.style.display   = 'block';
-        const W = 400, H = 180, PAD = 16;
+        const W = 400, H = 160, PAD = 14;
         const vals = snaps.map(s => s.patrimony);
-        const minV = Math.min(...vals);
-        const maxV = Math.max(...vals);
+        const minV = Math.min(...vals), maxV = Math.max(...vals);
         const range = maxV - minV || 1;
         const pts = snaps.map((s, i) => {
             const x = PAD + (i / (snaps.length - 1)) * (W - PAD * 2);
@@ -1117,65 +883,38 @@ function renderPerformance() {
         document.getElementById('chart-line').setAttribute('d', lineD);
         document.getElementById('chart-area').setAttribute('d', areaD);
         document.getElementById('chart-dots').innerHTML = pts.map(p =>
-            `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="var(--bg2)" stroke="var(--gold)" stroke-width="2"/>`
+            `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="var(--bg2)" stroke="var(--accent)" stroke-width="2"/>`
         ).join('');
     } else {
         chartEmpty.style.display = 'flex';
         chartSvg.style.display   = 'none';
     }
-
-    // Tabla snapshots
     const tbody = document.getElementById('perf-table');
-    if (!snaps.length) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text3);font-style:italic;">Sin datos aún</td></tr>';
-        return;
-    }
+    if (!snaps.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text4);font-size:12px;">Sin datos aún</td></tr>'; return; }
     tbody.innerHTML = snaps.slice().reverse().map(s => `
         <tr>
             <td>${s.date}</td>
             <td style="text-align:right">${fmt(s.cash)}</td>
             <td style="text-align:right">${fmt(s.invVal)}</td>
-            <td style="text-align:right; font-weight:700; color:var(--gold)">${fmt(s.patrimony)}</td>
+            <td style="text-align:right;font-weight:700;color:var(--accent)">${fmt(s.patrimony)}</td>
         </tr>`).join('');
 }
 
-// ─── NAVEGACIÓN ───────────────────────────────────────────
+// ─── NAV ──────────────────────────────────────────────────
 function changeTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.getElementById('tab-' + tabId).classList.add('active');
-
-    // Desktop nav
-    document.querySelectorAll('.nav-item[id^="nav-"]').forEach(el => el.classList.remove('active'));
-    const dNav = document.getElementById('nav-' + tabId);
-    if (dNav) dNav.classList.add('active');
-
-    // Mobile nav
-    document.querySelectorAll('.mobile-nav-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.mobile-nav-item[id^="mnav-"]').forEach(el => el.classList.remove('active'));
     const mNav = document.getElementById('mnav-' + tabId);
     if (mNav) mNav.classList.add('active');
-
     if (tabId === 'performance') renderPerformance();
 }
 
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const root    = document.getElementById('app-root');
-    sidebar.classList.toggle('open');
-    root.classList.toggle('sidebar-open');
-}
-
 // ─── MODALES ──────────────────────────────────────────────
-function openModal(id) {
-    document.getElementById(id).classList.add('open');
-}
-function closeModal(id) {
-    document.getElementById(id).classList.remove('open');
-}
-// Cerrar al click en overlay
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('open');
-    });
+    overlay.addEventListener('click', function(e) { if (e.target === this) this.classList.remove('open'); });
 });
 
 // ─── TOAST ────────────────────────────────────────────────
@@ -1184,88 +923,58 @@ function showToast(msg, type = 'success') {
     const toast = document.getElementById('toast');
     const dot   = document.getElementById('toast-dot');
     document.getElementById('toast-msg').textContent = msg;
-    dot.style.background = type === 'error' ? 'var(--red)' : type === 'warning' ? 'var(--gold)' : 'var(--green)';
+    dot.style.background = type === 'error' ? 'var(--red)' : type === 'warning' ? 'var(--amber)' : 'var(--green)';
     toast.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 // ─── UTILS ────────────────────────────────────────────────
-function fmt(n) {
-    return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD' }).format(n || 0);
-}
-function setText(id, val)   { const el = document.getElementById(id); if (el) el.textContent = val; }
+function fmt(n) { return new Intl.NumberFormat('en-US', { style:'currency', currency:'USD' }).format(n || 0); }
+function setText(id, val)        { const el = document.getElementById(id); if (el) el.textContent = val; }
 function setStyle(id, prop, val) { const el = document.getElementById(id); if (el) el.style[prop] = val; }
 
 // ─── PERSISTENCIA ─────────────────────────────────────────
-function saveState()  { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-function loadState()  {
+function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function loadState() {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
             state = JSON.parse(saved);
-            // Migrar estados viejos sin prices
-            if (!state.prices) {
-                state.prices = { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
-            }
+            if (!state.prices) state.prices = { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
         }
     } catch(e) { console.warn('Error cargando estado', e); }
 }
 
-// ─── PREVIEW KG EN MODAL SETUP ────────────────────────────
-function updateGreenKgPreview() {
-    const sacks = parseFloat(document.getElementById('setup-green-sacks').value) || 0;
-    const kg = (sacks * KG_PER_SACK_GREEN).toFixed(2);
-    document.getElementById('setup-green-kg-preview').textContent = `≈ ${kg} kg`;
-}
-document.addEventListener('DOMContentLoaded', () => {
-    const sacksInput = document.getElementById('setup-green-sacks');
-    if (sacksInput) sacksInput.addEventListener('input', updateGreenKgPreview);
-});
-
 // ─── DESHACER ─────────────────────────────────────────────
-// Guardamos una copia del estado ANTES de cada cambio
-let undoStack = []; // máximo 1 nivel
-
+let undoStack = [];
 function saveUndoSnapshot() {
     undoStack = [JSON.stringify(state)];
-    // Activar botones de deshacer
-    const btns = document.querySelectorAll('#btn-undo, #mnav-undo');
-    btns.forEach(b => { b.style.opacity = '1'; b.style.pointerEvents = 'auto'; });
+    const b = document.getElementById('mnav-undo');
+    if (b) { b.style.opacity = '1'; b.style.pointerEvents = 'auto'; }
 }
-
 function handleUndo() {
     if (!undoStack.length) { showToast('Nada que deshacer', 'warning'); return; }
     state = JSON.parse(undoStack.pop());
-    saveState();
-    updateUI();
-    // Desactivar botones
-    const btns = document.querySelectorAll('#btn-undo, #mnav-undo');
-    btns.forEach(b => { b.style.opacity = '0.4'; b.style.pointerEvents = 'none'; });
+    saveState(); updateUI();
+    const b = document.getElementById('mnav-undo');
+    if (b) { b.style.opacity = '0.35'; b.style.pointerEvents = 'none'; }
     showToast('Última acción deshecha ↩️');
 }
 
-// Inyectamos saveUndoSnapshot al inicio de addTransaction
-const _origAddTransaction = addTransaction;
-// Monkey-patch: guardamos snapshot antes de cada transacción
-// (ya está implícito — llamamos saveUndoSnapshot() dentro de cada handler)
-
 // ─── RESET ────────────────────────────────────────────────
 function handleReset() {
-    const input = document.getElementById('reset-confirm').value.trim().toUpperCase();
-    if (input !== 'BORRAR') {
-        showToast('Escribe BORRAR para confirmar', 'error');
-        return;
+    if (document.getElementById('reset-confirm').value.trim().toUpperCase() !== 'BORRAR') {
+        showToast('Escribe BORRAR para confirmar', 'error'); return;
     }
-    state = { cash: 0, inventory: { green: 0, roasted: 0 }, history: [], snapshots: [] };
+    state = { cash: 0, inventory: { green: 0, roasted: 0 }, history: [], snapshots: [], prices: { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK } };
     undoStack = [];
-    const btns = document.querySelectorAll('#btn-undo, #mnav-undo');
-    btns.forEach(b => { b.style.opacity = '0.4'; b.style.pointerEvents = 'none'; });
-    saveState();
-    updateUI();
+    const b = document.getElementById('mnav-undo');
+    if (b) { b.style.opacity = '0.35'; b.style.pointerEvents = 'none'; }
+    saveState(); updateUI();
     closeModal('modal-reset');
     document.getElementById('reset-confirm').value = '';
-    showToast('App restablecida a cero 🗑️', 'warning');
+    showToast('App restablecida 🗑️', 'warning');
 }
 </script>
 </body>
