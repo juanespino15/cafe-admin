@@ -426,9 +426,9 @@
         </div>
 
         <div class="sidebar-bottom">
-            <div class="nav-item" onclick="openModal('modal-setup')">
+            <div class="nav-item" onclick="openSetupModal()">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#e8c870"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M19.07 4.93A10 10 0 0 0 4.93 4.93"/></svg>
-                <span class="nav-label" style="color:#e8c870">Capital Inicial</span>
+                <span class="nav-label" style="color:#e8c870">Configurar</span>
             </div>
             <div class="nav-item" onclick="handleUndo()" id="btn-undo" style="opacity:0.4; pointer-events:none;">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#a0c4ff"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1 0 6 6.7L3 13"/></svg>
@@ -479,6 +479,14 @@
             <div class="page-header">
                 <h2 class="page-title">Panel de Control</h2>
                 <p class="page-sub">Gestión de caja e inventario físico</p>
+                <div id="prices-badge" style="display:inline-flex; gap:12px; margin-top:8px; flex-wrap:wrap;">
+                    <span style="font-size:11px; background:rgba(155,139,110,0.15); color:#9b8b6e; border-radius:99px; padding:3px 10px; font-weight:600;">
+                        🌿 Verde: <span id="badge-price-green">$240</span>/saco
+                    </span>
+                    <span style="font-size:11px; background:rgba(200,121,65,0.15); color:#c87941; border-radius:99px; padding:3px 10px; font-weight:600;">
+                        🔥 Tostado: <span id="badge-price-roasted">$270</span>/saco
+                    </span>
+                </div>
             </div>
 
             <div class="stat-grid">
@@ -758,25 +766,55 @@
     </div>
 </div>
 
-<!-- Capital Inicial -->
+<!-- Capital Inicial / Configuración -->
 <div class="modal-overlay" id="modal-setup">
-    <div class="modal">
-        <p class="modal-title">⚙️ Ajuste de Capital</p>
-        <p style="font-size:12px; color:var(--text3); margin-bottom:16px;">Establece los valores actuales para sincronizar el sistema.</p>
+    <div class="modal" style="max-width:460px;">
+        <p class="modal-title">⚙️ Configuración Inicial</p>
+        <p style="font-size:12px; color:var(--text3); margin-bottom:20px;">Establece tu inventario, caja y precios actuales para empezar a usar la app.</p>
+
+        <!-- INVENTARIO -->
+        <p style="font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); margin-bottom:10px;">📦 Inventario Actual</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:4px;">
+            <div class="input-group" style="margin-bottom:0">
+                <label class="input-label">Sacos de Café Verde</label>
+                <input type="number" step="0.01" min="0" class="input-field" id="setup-green-sacks" placeholder="0">
+                <p style="font-size:10px; color:var(--text3); margin-top:4px;" id="setup-green-kg-preview">≈ 0.00 kg</p>
+            </div>
+            <div class="input-group" style="margin-bottom:0">
+                <label class="input-label">Kilos de Tostado</label>
+                <input type="number" step="0.01" min="0" class="input-field" id="setup-roasted" placeholder="0">
+            </div>
+        </div>
+
+        <!-- CAJA -->
+        <p style="font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); margin-top:18px; margin-bottom:10px;">💵 Caja</p>
         <div class="input-group">
-            <label class="input-label">Efectivo en Caja ($)</label>
+            <label class="input-label">Efectivo disponible ($)</label>
             <input type="number" step="0.01" class="input-field" id="setup-cash" placeholder="0.00">
         </div>
-        <div class="input-group">
-            <label class="input-label">Kilos de Verde</label>
-            <input type="number" step="0.01" class="input-field" id="setup-green" placeholder="0">
+
+        <!-- PRECIOS -->
+        <p style="font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold); margin-top:6px; margin-bottom:10px;">💲 Precios por Saco</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="input-group" style="margin-bottom:0">
+                <label class="input-label">Saco Verde ($)</label>
+                <input type="number" step="0.01" min="0" class="input-field" id="setup-price-green" placeholder="240.00">
+            </div>
+            <div class="input-group" style="margin-bottom:0">
+                <label class="input-label">Saco Tostado ($)</label>
+                <input type="number" step="0.01" min="0" class="input-field" id="setup-price-roasted" placeholder="270.00">
+            </div>
         </div>
-        <div class="input-group">
-            <label class="input-label">Kilos de Tostado</label>
-            <input type="number" step="0.01" class="input-field" id="setup-roasted" placeholder="0">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:4px;">
+            <p style="font-size:10px; color:var(--text3);" id="setup-kg-green-label">Kg por saco: <span id="setup-kggreen-disp">46.2</span> kg</p>
+            <p style="font-size:10px; color:var(--text3);">Kg por saco: <span id="setup-kgroasted-disp">36</span> kg</p>
         </div>
-        <button class="btn btn-gold" onclick="handleSetup()">Aplicar Ajuste</button>
-        <button class="btn btn-ghost" onclick="closeModal('modal-setup')">Cancelar</button>
+
+        <div style="margin-top:20px;">
+            <button class="btn btn-gold" onclick="handleSetup()">✅ Aplicar y Guardar</button>
+            <button class="btn btn-ghost" onclick="closeModal('modal-setup')">Cancelar</button>
+        </div>
     </div>
 </div>
 
@@ -802,11 +840,11 @@
 </div>
 
 <script>
-// ─── CONSTANTES ───────────────────────────────────────────
-const PRICE_GREEN_SACK  = 240;
-const PRICE_ROASTED_SACK = 270;
-const KG_PER_SACK_GREEN  = 46.2;
-const KG_PER_SACK_ROASTED = 36;
+// ─── CONSTANTES BASE (defaults) ───────────────────────────
+const DEFAULT_PRICE_GREEN_SACK   = 240;
+const DEFAULT_PRICE_ROASTED_SACK = 270;
+const KG_PER_SACK_GREEN          = 46.2;
+const KG_PER_SACK_ROASTED        = 36;
 const MAX_SNAPSHOTS = 30;
 const STORAGE_KEY = 'cafe_admin_v5';
 
@@ -815,7 +853,11 @@ let state = {
     cash: 0,
     inventory: { green: 0, roasted: 0 },
     history: [],
-    snapshots: []
+    snapshots: [],
+    prices: {
+        greenSack:   DEFAULT_PRICE_GREEN_SACK,
+        roastedSack: DEFAULT_PRICE_ROASTED_SACK
+    }
 };
 
 // ─── INIT ─────────────────────────────────────────────────
@@ -826,9 +868,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // ─── CÁLCULO PATRIMONIO ───────────────────────────────────
 function calcPatrimony() {
+    const prices = state.prices || { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
     const invVal =
-        (state.inventory.green    / KG_PER_SACK_GREEN)  * PRICE_GREEN_SACK +
-        (state.inventory.roasted / KG_PER_SACK_ROASTED) * PRICE_ROASTED_SACK;
+        (state.inventory.green   / KG_PER_SACK_GREEN)   * prices.greenSack +
+        (state.inventory.roasted / KG_PER_SACK_ROASTED) * prices.roastedSack;
     return { total: state.cash + invVal, invVal };
 }
 
@@ -928,30 +971,50 @@ function handleExpense() {
 }
 
 function handleSetup() {
-    const cash    = parseFloat(document.getElementById('setup-cash').value)    || 0;
-    const green   = parseFloat(document.getElementById('setup-green').value)   || 0;
-    const roasted = parseFloat(document.getElementById('setup-roasted').value) || 0;
+    const sacks   = parseFloat(document.getElementById('setup-green-sacks').value) || 0;
+    const roasted = parseFloat(document.getElementById('setup-roasted').value)      || 0;
+    const cash    = parseFloat(document.getElementById('setup-cash').value)         || 0;
+
+    const priceGreen   = parseFloat(document.getElementById('setup-price-green').value)   || DEFAULT_PRICE_GREEN_SACK;
+    const priceRoasted = parseFloat(document.getElementById('setup-price-roasted').value) || DEFAULT_PRICE_ROASTED_SACK;
+
     saveUndoSnapshot();
     state.cash = cash;
-    state.inventory.green   = green;
+    state.inventory.green   = sacks * KG_PER_SACK_GREEN;
     state.inventory.roasted = roasted;
+    state.prices = { greenSack: priceGreen, roastedSack: priceRoasted };
+
     const now = new Date();
     state.history.unshift({
         id: Date.now(), type:'Ajuste',
         timestamp: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }),
-        desc: 'Ajuste manual de capital', cashDelta: 0, stockDelta: null
+        desc: `Configuración inicial: ${sacks} sacos verde, ${roasted}kg tostado, $${cash} caja`,
+        cashDelta: 0, stockDelta: null
     });
     const pat = calcPatrimony();
     state.snapshots.push({ date: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), ts: now.getTime(), patrimony: pat.total, cash: state.cash, invVal: pat.invVal });
     if (state.snapshots.length > MAX_SNAPSHOTS) state.snapshots.shift();
     saveState(); updateUI();
     closeModal('modal-setup');
-    showToast('Capital ajustado correctamente');
+    showToast('✅ Configuración guardada correctamente');
+}
+
+function openSetupModal() {
+    // Pre-llenar con valores actuales
+    const prices = state.prices || { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
+    document.getElementById('setup-green-sacks').value  = state.inventory.green   ? (state.inventory.green / KG_PER_SACK_GREEN).toFixed(2) : '';
+    document.getElementById('setup-roasted').value      = state.inventory.roasted || '';
+    document.getElementById('setup-cash').value         = state.cash              || '';
+    document.getElementById('setup-price-green').value   = prices.greenSack;
+    document.getElementById('setup-price-roasted').value = prices.roastedSack;
+    updateGreenKgPreview();
+    openSetupModal();
 }
 
 // ─── UI UPDATE ────────────────────────────────────────────
 function updateUI() {
     const pat = calcPatrimony();
+    const prices = state.prices || { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
 
     // Dashboard stats
     setText('stat-total-patrimony', fmt(pat.total));
@@ -959,6 +1022,10 @@ function updateUI() {
     setText('stat-inv-val', fmt(pat.invVal));
     setText('stat-green', state.inventory.green.toFixed(1) + ' kg');
     setText('stat-roasted', state.inventory.roasted.toFixed(1) + ' kg');
+
+    // Price badges
+    setText('badge-price-green',   '$' + prices.greenSack);
+    setText('badge-price-roasted', '$' + prices.roastedSack);
 
     // Inventario
     const maxKg = Math.max(state.inventory.green, state.inventory.roasted, 100);
@@ -1135,9 +1202,26 @@ function saveState()  { localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
 function loadState()  {
     try {
         const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) state = JSON.parse(saved);
+        if (saved) {
+            state = JSON.parse(saved);
+            // Migrar estados viejos sin prices
+            if (!state.prices) {
+                state.prices = { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
+            }
+        }
     } catch(e) { console.warn('Error cargando estado', e); }
 }
+
+// ─── PREVIEW KG EN MODAL SETUP ────────────────────────────
+function updateGreenKgPreview() {
+    const sacks = parseFloat(document.getElementById('setup-green-sacks').value) || 0;
+    const kg = (sacks * KG_PER_SACK_GREEN).toFixed(2);
+    document.getElementById('setup-green-kg-preview').textContent = `≈ ${kg} kg`;
+}
+document.addEventListener('DOMContentLoaded', () => {
+    const sacksInput = document.getElementById('setup-green-sacks');
+    if (sacksInput) sacksInput.addEventListener('input', updateGreenKgPreview);
+});
 
 // ─── DESHACER ─────────────────────────────────────────────
 // Guardamos una copia del estado ANTES de cada cambio
