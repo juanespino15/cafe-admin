@@ -538,11 +538,25 @@
         <div class="modal-sub">Registra la entrada de grano verde y el pago realizado</div>
         <div class="input-group">
             <label class="input-label">Kilos de verde recibidos</label>
-            <input type="number" step="0.01" min="0" class="input-field" id="buy-qty" placeholder="Ej: 46.2">
+            <input type="number" step="0.01" min="0" class="input-field" id="buy-qty" placeholder="Ej: 46.2" oninput="updateBuyPreview()">
         </div>
         <div class="input-group">
             <label class="input-label">Monto total pagado ($)</label>
-            <input type="number" step="0.01" min="0" class="input-field" id="buy-price" placeholder="Ej: 240.00">
+            <input type="number" step="0.01" min="0" class="input-field" id="buy-price" placeholder="Ej: 240.00" oninput="updateBuyPreview()">
+        </div>
+        <div id="buy-preview" style="display:none; background:var(--bg3); border-radius:10px; padding:11px 14px; margin-bottom:14px; font-size:12px; line-height:1.7;">
+            <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--text3);">Sacos equivalentes</span>
+                <strong id="buy-prev-sacos" style="color:var(--text2);">—</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--text3);">Valor en stock (precio config.)</span>
+                <strong id="buy-prev-stockval" style="color:var(--text2);">—</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; border-top:1px solid var(--border); margin-top:6px; padding-top:6px;">
+                <span style="color:var(--text3);">Efecto en patrimonio</span>
+                <strong id="buy-prev-delta" style="color:var(--text2);">—</strong>
+            </div>
         </div>
         <button class="btn btn-primary" onclick="handleBuy()">Registrar Compra</button>
         <button class="btn btn-ghost" onclick="closeModal('modal-buy')">Cancelar</button>
@@ -1040,6 +1054,23 @@ function updateAvgPrice() {
     } else {
         setText('avg-price-sack', '—');
     }
+}
+
+function updateBuyPreview() {
+    const qty   = parseFloat(document.getElementById('buy-qty').value)   || 0;
+    const price = parseFloat(document.getElementById('buy-price').value) || 0;
+    const preview = document.getElementById('buy-preview');
+    if (qty <= 0 && price <= 0) { preview.style.display = 'none'; return; }
+    preview.style.display = 'block';
+    const p      = state.prices || { greenSack: DEFAULT_PRICE_GREEN_SACK, roastedSack: DEFAULT_PRICE_ROASTED_SACK };
+    const sacos  = qty / KG_PER_SACK_GREEN;
+    const stockVal = sacos * p.greenSack;
+    const delta    = stockVal - price;
+    document.getElementById('buy-prev-sacos').textContent    = sacos.toFixed(2) + ' sacos';
+    document.getElementById('buy-prev-stockval').textContent = fmt(stockVal);
+    const deltaEl = document.getElementById('buy-prev-delta');
+    deltaEl.textContent = (delta >= 0 ? '+' : '') + fmt(delta);
+    deltaEl.style.color = delta >= 0 ? 'var(--green)' : 'var(--red)';
 }
 
 // ─── NAV ──────────────────────────────────────────────────
