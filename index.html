@@ -111,7 +111,7 @@
         .hero-pills { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
         .hero-pill  {
             background: rgba(255,255,255,0.1); border-radius: 99px;
-            padding: 7px 16px; font-size: 16px; font-weight: 600;
+            padding: 9px 18px; font-size: 19px; font-weight: 600;
             color: rgba(255,255,255,0.85);
         }
 
@@ -337,6 +337,13 @@
             </div>
         </div>
 
+        <!-- Precio promedio -->
+        <div id="avg-price-bar" style="margin-bottom:18px; margin-top:-6px;">
+            <p style="font-size:11px; color:var(--text4);">
+                Precio prom./saco: <strong id="avg-price-sack" style="color:var(--text3);">—</strong>
+            </p>
+        </div>
+
         <!-- Actions -->
         <div class="actions-title">Acciones Rápidas</div>
         <div class="action-grid">
@@ -366,6 +373,20 @@
                 <div>
                     <div class="action-title">Gasto</div>
                     <div class="action-sub">Salida de efectivo</div>
+                </div>
+            </div>
+            <div class="action-card" onclick="openModal('modal-sell-green')">
+                <div class="action-icon" style="background:#F0FDF4; font-size:20px;">🌿</div>
+                <div>
+                    <div class="action-title">Venta Verde</div>
+                    <div class="action-sub">A torrefactoras</div>
+                </div>
+            </div>
+            <div class="action-card" onclick="openModal('modal-sell-roasted')">
+                <div class="action-icon" style="background:#FEF9EE; font-size:20px;">☕</div>
+                <div>
+                    <div class="action-title">Venta Tostado</div>
+                    <div class="action-sub">Egreso de stock</div>
                 </div>
             </div>
         </div>
@@ -619,6 +640,46 @@
     </div>
 </div>
 
+<!-- Venta Verde -->
+<div class="modal-overlay" id="modal-sell-green">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">🌿 Venta de Verde</div>
+        <div class="modal-sub">Egreso de café verde a torrefactoras — solo resta kilos del stock</div>
+        <div class="input-group">
+            <label class="input-label">Kilos de verde vendidos</label>
+            <input type="number" step="0.01" min="0" class="input-field" id="sell-green-qty" placeholder="Ej: 92.4">
+            <p style="font-size:10px; color:var(--text4); margin-top:4px;" id="sell-green-sacks-preview">≈ 0.00 sacos</p>
+        </div>
+        <div class="input-group">
+            <label class="input-label">Cliente / Concepto</label>
+            <input type="text" class="input-field" id="sell-green-concept" placeholder="Ej: Torrefactora La Montaña">
+        </div>
+        <button class="btn btn-green" onclick="handleSellGreen()">Registrar Venta</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-sell-green')">Cancelar</button>
+    </div>
+</div>
+
+<!-- Venta Tostado -->
+<div class="modal-overlay" id="modal-sell-roasted">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-title">☕ Venta de Tostado</div>
+        <div class="modal-sub">Egreso de café tostado — solo resta kilos del stock</div>
+        <div class="input-group">
+            <label class="input-label">Kilos de tostado vendidos</label>
+            <input type="number" step="0.01" min="0" class="input-field" id="sell-roasted-qty" placeholder="Ej: 36.0">
+            <p style="font-size:10px; color:var(--text4); margin-top:4px;" id="sell-roasted-sacks-preview">≈ 0.00 sacos</p>
+        </div>
+        <div class="input-group">
+            <label class="input-label">Cliente / Concepto</label>
+            <input type="text" class="input-field" id="sell-roasted-concept" placeholder="Ej: Cliente mayorista centro">
+        </div>
+        <button class="btn btn-green" onclick="handleSellRoasted()">Registrar Venta</button>
+        <button class="btn btn-ghost" onclick="closeModal('modal-sell-roasted')">Cancelar</button>
+    </div>
+</div>
+
 <!-- Reset -->
 <div class="modal-overlay" id="modal-reset">
     <div class="modal">
@@ -664,6 +725,14 @@ window.addEventListener('DOMContentLoaded', () => {
     updateUI();
     document.getElementById('setup-green-kg').addEventListener('input', updateInventoryPreviews);
     document.getElementById('setup-roasted').addEventListener('input', updateInventoryPreviews);
+    document.getElementById('sell-green-qty').addEventListener('input', () => {
+        const qty = parseFloat(document.getElementById('sell-green-qty').value) || 0;
+        document.getElementById('sell-green-sacks-preview').textContent = `≈ ${(qty / KG_PER_SACK_GREEN).toFixed(2)} sacos`;
+    });
+    document.getElementById('sell-roasted-qty').addEventListener('input', () => {
+        const qty = parseFloat(document.getElementById('sell-roasted-qty').value) || 0;
+        document.getElementById('sell-roasted-sacks-preview').textContent = `≈ ${(qty / KG_PER_SACK_ROASTED).toFixed(2)} sacos`;
+    });
 });
 
 // ─── PATRIMONIO ───────────────────────────────────────────
@@ -800,6 +869,8 @@ function updateUI() {
     setText('badge-price-green',   '$' + prices.greenSack);
     setText('badge-price-roasted', '$' + prices.roastedSack);
 
+    updateAvgPrice();
+
     const maxKg = Math.max(state.inventory.green, state.inventory.roasted, 100);
     setText('inv-green-qty',     state.inventory.green.toFixed(1)   + ' kg');
     setText('inv-roasted-qty',   state.inventory.roasted.toFixed(1) + ' kg');
@@ -831,11 +902,13 @@ function renderLists() {
     }).join('');
 
     const typeColors = {
-        Compra:  'background:#F1F5F9;color:#9B8B6E',
-        Tostado: 'background:#FFF7ED;color:#C87941',
-        Ingreso: 'background:#ECFDF5;color:var(--green)',
-        Gasto:   'background:#FEF2F2;color:var(--red)',
-        Ajuste:  'background:#EFF6FF;color:var(--accent)'
+        Compra:   'background:#F1F5F9;color:#9B8B6E',
+        Tostado:  'background:#FFF7ED;color:#C87941',
+        Ingreso:  'background:#ECFDF5;color:var(--green)',
+        Gasto:    'background:#FEF2F2;color:var(--red)',
+        Ajuste:   'background:#EFF6FF;color:var(--accent)',
+        'Venta V':'background:#F0FDF4;color:#15803D',
+        'Venta T':'background:#FEF9EE;color:#92400E'
     };
     fullBody.innerHTML = state.history.map(item => {
         const cashColor = item.cashDelta > 0 ? 'color:var(--green)' : (item.cashDelta < 0 ? 'color:var(--red)' : 'color:var(--text4)');
@@ -898,6 +971,64 @@ function renderPerformance() {
             <td style="text-align:right">${fmt(s.invVal)}</td>
             <td style="text-align:right;font-weight:700;color:var(--accent)">${fmt(s.patrimony)}</td>
         </tr>`).join('');
+}
+
+function handleSellGreen() {
+    const qty     = parseFloat(document.getElementById('sell-green-qty').value);
+    const concept = document.getElementById('sell-green-concept').value.trim() || 'Venta verde';
+    if (!qty || qty <= 0) { showToast('Ingresa una cantidad válida', 'error'); return; }
+    if (state.inventory.green < qty) { showToast(`Stock insuficiente (${state.inventory.green.toFixed(1)} kg disponibles)`, 'error'); return; }
+    saveUndoSnapshot();
+    state.inventory.green -= qty;
+    const sacos = (qty / KG_PER_SACK_GREEN).toFixed(2);
+    const now = new Date();
+    state.history.unshift({ id: Date.now(), type:'Venta V', timestamp: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), desc: `${concept} — ${qty}kg verde (${sacos} sacos)`, cashDelta: 0, stockDelta: null });
+    const pat = calcPatrimony();
+    state.snapshots.push({ date: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), ts: now.getTime(), patrimony: pat.total, cash: state.cash, invVal: pat.invVal });
+    if (state.snapshots.length > MAX_SNAPSHOTS) state.snapshots.shift();
+    saveState(); updateUI();
+    closeModal('modal-sell-green');
+    document.getElementById('sell-green-qty').value     = '';
+    document.getElementById('sell-green-concept').value = '';
+    document.getElementById('sell-green-sacks-preview').textContent = '≈ 0.00 sacos';
+    showToast(`-${qty}kg verde egresado`);
+}
+
+function handleSellRoasted() {
+    const qty     = parseFloat(document.getElementById('sell-roasted-qty').value);
+    const concept = document.getElementById('sell-roasted-concept').value.trim() || 'Venta tostado';
+    if (!qty || qty <= 0) { showToast('Ingresa una cantidad válida', 'error'); return; }
+    if (state.inventory.roasted < qty) { showToast(`Stock insuficiente (${state.inventory.roasted.toFixed(1)} kg disponibles)`, 'error'); return; }
+    saveUndoSnapshot();
+    state.inventory.roasted -= qty;
+    const sacos = (qty / KG_PER_SACK_ROASTED).toFixed(2);
+    const now = new Date();
+    state.history.unshift({ id: Date.now(), type:'Venta T', timestamp: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), desc: `${concept} — ${qty}kg tostado (${sacos} sacos)`, cashDelta: 0, stockDelta: null });
+    const pat = calcPatrimony();
+    state.snapshots.push({ date: now.toLocaleString('es', { dateStyle:'short', timeStyle:'short' }), ts: now.getTime(), patrimony: pat.total, cash: state.cash, invVal: pat.invVal });
+    if (state.snapshots.length > MAX_SNAPSHOTS) state.snapshots.shift();
+    saveState(); updateUI();
+    closeModal('modal-sell-roasted');
+    document.getElementById('sell-roasted-qty').value     = '';
+    document.getElementById('sell-roasted-concept').value = '';
+    document.getElementById('sell-roasted-sacks-preview').textContent = '≈ 0.00 sacos';
+    showToast(`-${qty}kg tostado egresado`);
+}
+
+function updateAvgPrice() {
+    let totalPagado = 0, totalKg = 0;
+    state.history.forEach(item => {
+        if (item.type === 'Compra' && item.cashDelta < 0 && item.stockDelta && item.stockDelta.type === 'green') {
+            totalPagado += Math.abs(item.cashDelta);
+            totalKg     += item.stockDelta.qty;
+        }
+    });
+    if (totalKg > 0) {
+        const pxSaco = (totalPagado / totalKg) * KG_PER_SACK_GREEN;
+        setText('avg-price-sack', fmt(pxSaco) + ' / saco');
+    } else {
+        setText('avg-price-sack', '—');
+    }
 }
 
 // ─── NAV ──────────────────────────────────────────────────
