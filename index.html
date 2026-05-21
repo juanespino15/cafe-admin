@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>CaféAdmin</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CaféAdmin">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%231A2E4A'/%3E%3Ctext x='90' y='120' font-size='100' text-anchor='middle'%3E%E2%98%95%3C/text%3E%3C/svg%3E">
+    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22Caf%C3%A9Admin%22%2C%22short_name%22%3A%22Caf%C3%A9Admin%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231A2E4A%22%2C%22theme_color%22%3A%22%231A2E4A%22%7D">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -376,7 +381,13 @@
                 </div>
             </div>
             <div class="action-card" onclick="openModal('modal-sell-green')">
-                <div class="action-icon" style="background:#F0FDF4; font-size:20px;">🌿</div>
+                <div class="action-icon" style="background:#F0FDF4; font-size:20px;">
+                    <svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="50" cy="50" rx="38" ry="28" fill="#7CB87A" transform="rotate(-30 50 50)"/>
+                        <ellipse cx="50" cy="50" rx="38" ry="28" fill="#6AAD68" transform="rotate(-30 50 50)" opacity="0.5"/>
+                        <path d="M50 22 Q55 50 50 78" stroke="#4A8A48" stroke-width="3.5" fill="none" stroke-linecap="round" transform="rotate(-30 50 50)"/>
+                    </svg>
+                </div>
                 <div>
                     <div class="action-title">Venta Verde</div>
                     <div class="action-sub">A torrefactoras</div>
